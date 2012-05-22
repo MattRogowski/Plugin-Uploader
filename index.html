@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Plugin-uploader by MattRogowski</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Plugin-uploader</h1>
+        <p>MyBB plugin - Allows you to import .zip plugin archives directly and have the files extracted to their correct locations automatically.</p>
+        <p class="view"><a href="https://github.com/MattRogowski/Plugin-Uploader">View the Project on GitHub <small>MattRogowski/Plugin-Uploader</small></a></p>
+        <ul>
+          <li><a href="https://github.com/MattRogowski/Plugin-Uploader/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/MattRogowski/Plugin-Uploader/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/MattRogowski/Plugin-Uploader">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p>Name: Plugin Uploader
+Description: Allows you to import .zip plugin archives directly and have the files extracted to their correct locations automatically.
+Website: <a href="http://mattrogowski.co.uk/mybb/plugins/plugin/plugin-uploader">http://mattrogowski.co.uk/mybb/plugins/plugin/plugin-uploader</a>
+Author: MattRogowski
+Authorsite: <a href="http://mattrogowski.co.uk/mybb/">http://mattrogowski.co.uk/mybb/</a>
+Version: 1.0.1
+Compatibility: 1.6.x
+Files: 4 (plus 1 optional core file edit)
+Database changes: 1 new table, 1 new column to one table</p>
+
+<p>To Install:
+Upload ./inc/plugins/pluginuploader.php to ./inc/plugins/
+Upload ./admin/modules/config/pluginuploader.php to ./admin/modules/config/
+Upload ./inc/languages/english/admin/config_pluginuploader.lang.php to ./inc/languages/english/admin/
+Create folder 'temp' in ./inc/plugins/ and CHMOD to 777.
+Upload ./inc/plugins/temp/test.php to ./inc/plugins/temp/
+Optional (but highly recommended) core file edit: Upload ./admin/modules/config/plugins.php to ./admin/modules/config/
+Go to ACP &gt; Plugins &gt; Install and Activate
+Go to ACP &gt; Configuration &gt; Plugins &gt; Upload Plugin</p>
+
+<p>Information:
+This plugin will allow you to import a plugin .zip or .php file directly to the ACP and have the files moved to their correct locations.</p>
+
+<p>For security, a password is required when uploading a plugin.</p>
+
+<p>It will try and show you screenshots of the plugin if any have been provided.</p>
+
+<p>If the plugin is from the MyBB Mods site, it will check that the version you are uploading is the latest version, and if it's not, will give you the download URL for the newer version.</p>
+
+<p>Allows you to delete all the files for a plugin (if the plugin was uploaded with this plugin uploader).</p>
+
+<p>Supports uploading an upgraded/newer version of a plugin, and supports renamed admin directories.</p>
+
+<p>Offers not to upload non-PHP root files to save clutter.</p>
+
+<p>Change Log:
+27/11/10 - v0.1 -&gt; Initial beta release.
+02/12/10 - v0.1 -&gt; v0.2 -&gt; Fixed bug where you may have got a blank page or PHP error when installing the plugin. Fixed bug where the tab for the Plugin Uploader wouldn't show on the Sharepoint theme and some other ACP themes. Fixed bug where the plugins list would be broken if the plugin was deactivated. Fixed bug where you'd get a PHP error if the ZipArchive class is not available. Fixed bug where plugins could run on the page showing information about the plugin. Fixed bug where not all language files would be loaded for the page showing information about the plugin. Tweaked how list of files in the plugin package is collected and stored. Warning for deleting a plugin will now show which files will be deleted. To upgrade, reupload ./inc/plugins/pluginuploader.php, ./admin/modules/config/pluginuploader.php, ./inc/languages/english/admin/config_pluginuploader.lang.php, and (optional core file edit) ./admin/modules/config/plugins.php
+09/12/10 - v0.2 -&gt; v0.3 -&gt; Fixed bug were you'd get PHP errors on the plugins page if you have other plugins uploaded, but this is the first plugin you activated. Tweaked how it searches for the plugin file root. If the plugin is from the MyBB Mods site, it will now check the plugin version and tell you if it's out of date. Import page that shows information about the plugin will now try and find screenshots and display them as thumbnails on the information page. To upgrade, reupload ./inc/plugins/pluginuploader.php, ./admin/modules/config/pluginuploader.php, and ./inc/languages/english/admin/config_pluginuploader.lang.php
+09/12/10 - v0.3 -&gt; v0.3.1 -&gt; Fixed bug were you'd get PHP errors if the plugin had external files as the file path was wrong. To upgrade, reupload ./inc/plugins/pluginuploader.php and ./admin/modules/config/pluginuploader.php
+19/01/11 - v0.3.1 -&gt; v0.4 -&gt; Added a password check when uploading plugins. To upgrade, reupload ./inc/plugins/pluginuploader.php, ./admin/modules/config/pluginuploader.php, and ./inc/languages/english/admin/config_pluginuploader.lang.php. More information on this is available here: <a href="http://mattrogowski.co.uk/plugins/thread-15.html">http://mattrogowski.co.uk/plugins/thread-15.html</a>
+19/01/11 - v0.4 -&gt; v0.4.1 -&gt; Fixed a bug where choosing to activate a plugin after importing would redirect back to the plugin uploader page. Fixed a bug where you'd get an error saying the password was wrong after choosing to import the plugin. To upgrade, reupload ./inc/plugins/pluginuploader.php and ./admin/modules/config/pluginuploader.php.
+07/02/11 - v0.4.1 -&gt; v0.4.2 -&gt; Fixed a bug where the custom plugin system class may be unavailable. Changed when the language files are temporarily uploaded in case the plugin file loads a language file outside of a function. To upgrade, reupload ./inc/plugins/pluginuploader.php and ./admin/modules/config/pluginuploader.php
+14/06/11 - v0.4.2 -&gt; v1.0 -&gt; Added the ability to store a cookie for the plugin uploader password to save having to upload it every time you upload a plugin. Added the ability to totally disable the password check. Added support for renamed admin directories. Added support to upload a single PHP file. Fixed a bug caused by a PHP peculiarity that would mean the plugin file couldn't be found. Added a check for if files have been uploaded with an owner of nobody. Made major improvements to how files are copied/moved, including connection via FTP to move the files. More information on this can be found here: <a href="http://mattrogowski.co.uk/mybb/thread-197.html">http://mattrogowski.co.uk/mybb/thread-197.html</a> To upgrade, reupload ./inc/plugins/pluginuploader.php, ./admin/modules/config/pluginuploader.php, ./inc/languages/english/admin/config_pluginuploader.lang.php, and upload ./inc/plugins/temp/test.php to ./inc/plugins/temp/
+03/12/11 - v1.0 -&gt; v1.0.1 -&gt; Made compatible with MyBB 1.6.5. To upgrade, reupload ./inc/plugins/pluginuploader.php</p>
+
+<p>Copyright 2011 Matthew Rogowski</p>
+
+<ul>
+<li>Licensed under the Apache License, Version 2.0 (the "License");</li>
+<li>you may not use this file except in compliance with the License.</li>
+<li>
+<p>You may obtain a copy of the License at</p>
+
+<p>** <a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+</li>
+<li><p>Unless required by applicable law or agreed to in writing, software</p></li>
+<li><p>distributed under the License is distributed on an "AS IS" BASIS,</p></li>
+<li><p>WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</p></li>
+<li><p>See the License for the specific language governing permissions and</p></li>
+<li><p>limitations under the License.</p></li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/MattRogowski">MattRogowski</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
