@@ -3,7 +3,7 @@ Description: Allows you to import .zip plugin archives directly and have the fil
 Website: http://mattrogowski.co.uk/mybb/plugins/plugin/plugin-uploader
 Author: MattRogowski
 Authorsite: http://mattrogowski.co.uk/mybb/
-Version: 1.0.1
+Version: 1.1
 Compatibility: 1.6.x
 Files: 4 (plus 1 optional core file edit)
 Database changes: 1 new table, 1 new column to one table
