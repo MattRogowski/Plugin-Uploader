@@ -1004,7 +1004,7 @@ elseif($mybb->input['action2'] == "install")
 		'description' => $lang->browse_plugins_desc
 	);
 	
-	$plugins->run_hooks_by_ref("admin_config_plugins_tabs", $sub_tabs);
+	$plugins->run_hooks("admin_config_plugins_tabs", $sub_tabs);
 	
 	$page->output_nav_tabs($sub_tabs, 'upload_plugin');
 	
@@ -1388,9 +1388,9 @@ else
 		'link' => "index.php?module=config-plugins&amp;action=browse",
 		'description' => $lang->browse_plugins_desc
 	);
-	
-	$plugins->run_hooks_by_ref("admin_config_plugins_tabs", $sub_tabs);
-	
+
+	$plugins->run_hooks("admin_config_plugins_tabs", $sub_tabs);
+
 	$page->output_nav_tabs($sub_tabs, 'upload_plugin');
 	
 	if(!DISABLE_PLUGINUPLOADER_PASSWORD)

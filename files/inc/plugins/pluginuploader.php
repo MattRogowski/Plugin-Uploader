@@ -42,7 +42,7 @@ function pluginuploader_info()
 		'author' => 'MattRogowski',
 		'authorsite' => 'http://mattrogowski.co.uk/mybb/',
 		'version' => '1.1.2',
-		'compatibility' => '16*',
+		'compatibility' => '18*',
 		'guid' => 'bf2f8440a92b2c8dc841ec7dc1929ff4'
 	);
 }
@@ -366,42 +366,65 @@ function pluginuploader_admin_config_plugins_begin()
 
 function pluginuploader_admin_config_plugins_plugin_list()
 {
-	global $plugins, $plugin_urls;
+	global $mybb, $lang, $plugins, $plugin_urls;
 	
 	$plugins_list = get_plugins_list();
-	$urls = array();
+	$info = array();
+
 	if($plugins_list)
 	{
+		$active_hooks = $plugins->hooks;
 		foreach($plugins_list as $plugin_file)
 		{
 			require_once MYBB_ROOT."inc/plugins/".$plugin_file;
 			$codename = str_replace(".php", "", $plugin_file);
 			$infofunc = $codename."_info";
-			if(function_exists($infofunc))
+			if(!function_exists($infofunc))
 			{
-				$plugininfo = $infofunc();
-				$plugininfo['guid'] = trim($plugininfo['guid']);
-				
-				if($plugininfo['guid'] != "")
-				{
-					$urls[] = $plugininfo['guid'];
-				}
+				continue;
+			}
+			$plugininfo = $infofunc();
+			$plugininfo['guid'] = trim($plugininfo['guid']);
+			$plugininfo['codename'] = trim($plugininfo['codename']);
+
+			if($plugininfo['codename'] != "")
+			{
+				$info[]	= $plugininfo['codename'];
+				$names[$plugininfo['codename']] = array('name' => $plugininfo['name'], 'version' => $plugininfo['version']);
+			}
+			elseif($plugininfo['guid'] != "")
+			{
+				$info[] =  $plugininfo['guid'];
+				$names[$plugininfo['guid']] = array('name' => $plugininfo['name'], 'version' => $plugininfo['version']);
 			}
 		}
+		$plugins->hooks = $active_hooks;
 	}
-	
-	$url = "http://mods.mybb.com/version_check.php?";
-	foreach($urls as $guid)
+
+	if(empty($info))
 	{
-		$url .= "info[]=".urlencode($guid)."&";
+		return;
 	}
-	$url = substr($url, 0, -1);
 	
+	$url = "http://community.mybb.com/version_check.php?";
+	$url .= http_build_query(array("info" => $info))."&";
 	require_once MYBB_ROOT."inc/class_xml.php";
 	$contents = fetch_remote_file($url);
+
+	if(!$contents)
+	{
+		return;
+	}
 	
 	$parser = new XMLParser($contents);
 	$tree = $parser->get_tree();
+
+	if(!is_array($tree) || !isset($tree['plugins']) || array_key_exists('error', $tree['plugins']))
+	{
+		return;
+	}
+
+	$lang->load("config_pluginuploader");
 	
 	$plugins_info = $tree['plugins']['plugin'];
 	$plugin_urls = array();
@@ -411,14 +434,23 @@ function pluginuploader_admin_config_plugins_plugin_list()
 		{
 			foreach($plugins_info as $item)
 			{
-				$plugin_urls[$item['attributes']['guid']] = $item['download_url']['value'];
+				$plugin_urls[$names[$item['attributes']['codename']]['name']] = array('codename' => $item['attributes']['codename'], 'url' => $item['download_url']['value']);
 			}
 		}
 		else
 		{
-			$plugin_urls[$plugins_info['attributes']['guid']] = $plugins_info['download_url']['value'];
+			$plugin_urls[$names[$plugins_info['attributes']['codename']]['name']] = array('codename' => $item['attributes']['codename'], 'url' => $plugins_info['download_url']['value']);
 		}
 	}
+
+	echo '<script src="jscripts/pluginuploader.js"></script>';
+	echo '<script>
+	var plugin_download_urls = '.json_encode($plugin_urls).';
+	var can_use_mods_site = '.(int)pluginuploader_can_use_mods_site().';
+	var mybb_post_key = \''.$mybb->post_code.'\';
+	var lang_delete = \''.$lang->delete.'\';
+	var lang_pluginuploader_reimport = \''.$lang->pluginuploader_reimport.'\';
+	</script>';
 }
 
 function pluginuploader_admin_config_plugins_plugin_list_plugin(&$table)
