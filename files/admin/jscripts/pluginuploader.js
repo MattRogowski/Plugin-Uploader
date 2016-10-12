@@ -33,6 +33,7 @@ $(document).ready(function() {
 			});
 			break;
 		case 'check':
+		case 'browse':
 			$('.border_wrapper .title + table th:last-child').attr('colspan', 2).attr('width', '');
 			$('.border_wrapper .title + table tbody tr').each(function(i, plugin) {
 				$(plugin).find('td:last').width(150);
@@ -42,9 +43,6 @@ $(document).ready(function() {
 				$(td).append(a);
 				$(plugin).append(td);
 			});
-			break;
-		case 'browse':
-
 			break;
 	}
 });
