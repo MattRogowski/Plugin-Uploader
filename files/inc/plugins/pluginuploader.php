@@ -29,9 +29,9 @@ $plugins->add_hook("admin_config_plugins_tabs", "pluginuploader_add_pluginupload
 $plugins->add_hook("admin_page_output_nav_tabs_start", "pluginuploader_add_pluginuploader_tab");
 $plugins->add_hook("admin_config_plugins_begin", "pluginuploader_admin_config_plugins_begin");
 $plugins->add_hook("admin_config_plugins_plugin_list", "pluginuploader_admin_config_plugins_plugin_list");
-$plugins->add_hook("admin_config_plugins_plugin_list_plugin", "pluginuploader_admin_config_plugins_plugin_list_plugin");
-$plugins->add_hook("admin_config_plugins_plugin_updates_plugin", "pluginuploader_admin_config_plugins_plugin_updates_plugin");
+$plugins->add_hook("admin_config_plugins_check", "pluginuploader_admin_config_plugins_check");
 $plugins->add_hook("admin_config_plugins_browse_plugins_plugin", "pluginuploader_admin_config_plugins_browse_plugins_plugin");
+$plugins->add_hook("admin_page_output_footer", "pluginuploader_admin_page_output_footer");
 
 function pluginuploader_info()
 {
@@ -366,7 +366,7 @@ function pluginuploader_admin_config_plugins_begin()
 
 function pluginuploader_admin_config_plugins_plugin_list()
 {
-	global $mybb, $lang, $plugins, $plugin_urls;
+	global $mybb, $lang, $plugins, $plugin_urls, $pluginuploader_js;
 	
 	$plugins_list = get_plugins_list();
 	$info = array();
@@ -443,8 +443,9 @@ function pluginuploader_admin_config_plugins_plugin_list()
 		}
 	}
 
-	echo '<script src="jscripts/pluginuploader.js"></script>';
-	echo '<script>
+	$pluginuploader_js = '<script src="jscripts/pluginuploader.js"></script>';
+	$pluginuploader_js .= '<script>
+	var pluginuploader_section = \'list\';
 	var plugin_download_urls = '.json_encode($plugin_urls).';
 	var can_use_mods_site = '.(int)pluginuploader_can_use_mods_site().';
 	var mybb_post_key = \''.$mybb->post_code.'\';
@@ -453,64 +454,18 @@ function pluginuploader_admin_config_plugins_plugin_list()
 	</script>';
 }
 
-function pluginuploader_admin_config_plugins_plugin_list_plugin(&$table)
+function pluginuploader_admin_config_plugins_check()
 {
-	global $mybb, $cache, $lang, $plugin_urls, $plugininfo, $codename;
-	
-	$plugins_cache = $cache->read("plugins");
-	if(!is_array($plugins_cache['active']))
-	{
-		return;
-	}
-	if(!in_array("pluginuploader", $plugins_cache['active']))
-	{
-		return;
-	}
-	
-	$lang->load("config_pluginuploader");
-	
-	$table->construct_cell("<a href=\"index.php?module=config-plugins&amp;action=delete&amp;plugin={$codename}&amp;my_post_key={$mybb->post_code}\">{$lang->delete}</a>", array("class" => "align_center", "width" => 150));
-	if(empty($plugininfo['guid']))
-	{
-		$table->construct_cell("&nbsp;", array("class" => "align_center", "width" => 150));
-	}
-	else
-	{
-		if(pluginuploader_can_use_mods_site())
-		{
-			$table->construct_cell("<a href=\"index.php?module=config-plugins&amp;action=pluginuploader&amp;action2=install&amp;plugin={$plugin_urls[trim($plugininfo['guid'])]}&amp;my_post_key={$mybb->post_code}\">{$lang->pluginuploader_reimport}</a>", array("class" => "align_center", "width" => 150));
-		}
-		else
-		{
-			$table->construct_cell($lang->pluginuploader_mods_site_unavailable, array("class" => "align_center", "width" => 150));
-		}
-	}
-}
-
-function pluginuploader_admin_config_plugins_plugin_updates_plugin(&$table)
-{
-	global $mybb, $cache, $lang, $plugin;
-	
-	$plugins_cache = $cache->read("plugins");
-	if(!is_array($plugins_cache['active']))
-	{
-		return;
-	}
-	if(!in_array("pluginuploader", $plugins_cache['active']))
-	{
-		return;
-	}
+	global $mybb, $lang, $pluginuploader_js;
 
 	$lang->load("config_pluginuploader");
 
-	if(pluginuploader_can_use_mods_site())
-	{
-		$table->construct_cell("<a href=\"index.php?module=config-plugins&amp;action=pluginuploader&amp;action2=install&amp;plugin={$plugin['download_url']['value']}&amp;my_post_key={$mybb->post_code}\"><strong>{$lang->pluginuploader_upgrade}</strong></a>", array("class" => "align_center", "width" => 150));
-	}
-	else
-	{
-		$table->construct_cell($lang->pluginuploader_mods_site_unavailable, array("class" => "align_center", "width" => 150));
-	}
+	$pluginuploader_js = '<script src="jscripts/pluginuploader.js"></script>';
+	$pluginuploader_js .= '<script>
+	var pluginuploader_section = \'check\';
+	var mybb_post_key = \''.$mybb->post_code.'\';
+	var lang_upgrade = \''.$lang->pluginuploader_upgrade.'\';
+	</script>';
 }
 
 function pluginuploader_admin_config_plugins_browse_plugins_plugin(&$table)
@@ -536,6 +491,16 @@ function pluginuploader_admin_config_plugins_browse_plugins_plugin(&$table)
 	else
 	{
 		$table->construct_cell($lang->pluginuploader_mods_site_unavailable, array("class" => "align_center", "width" => 150));
+	}
+}
+
+function pluginuploader_admin_page_output_footer(&$args)
+{
+	global $pluginuploader_js;
+
+	if($pluginuploader_js)
+	{
+		echo $pluginuploader_js;
 	}
 }
 
