@@ -164,18 +164,7 @@ if($mybb->input['action2'] == "do_upload")
 					$is_mods_site = preg_match('#community\.mybb\.com/mods\.php\?action=(view|download)&pid=([0-9]+)#', $mybb->input['plugin_url'], $plugin_url_info);
 					if($is_mods_site)
 					{
-						// if it is, get the name
-						if($plugin_url_info[2])
-						{
-							admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=install&plugin=".$plugin_url_info[2]."&my_post_key={$mybb->post_code}");
-						}
-						// if there's not a valid name, strip out everything to just leave the name that was given and put it into the error message
-						else
-						{
-							$plugin_name = str_replace(array('http://', '/'), '', preg_replace('#mods.(mybb.com|mybboard.net)/(view|download)#', '', $mybb->input['plugin_url']));
-							flash_message($lang->sprintf($lang->pluginuploader_download_from_mods_invalid, $plugin_name), 'error');
-							admin_redirect("index.php?module=config-plugins&action=pluginuploader");
-						}
+						admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=install&plugin=".$plugin_url_info[2]."&my_post_key={$mybb->post_code}");
 					}
 					// if it's not, fetch the URL and save the output to a file
 					else
@@ -908,7 +897,7 @@ elseif($mybb->input['action2'] == "do_install")
 	}
 	else
 	{
-		flash_message($lang->sprintf($lang->pluginuploader_error_downloading_from_mods, $plugin_name).'<br /><br />'.$lang->pluginuploader_error_downloading_from_mods_unknown_error, 'error');
+		flash_message($lang->sprintf($lang->pluginuploader_error_downloading_from_mods, $plugin_id).'<br /><br />'.$lang->pluginuploader_error_downloading_from_mods_unknown_error, 'error');
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 	}
 }
