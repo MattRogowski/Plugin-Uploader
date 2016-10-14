@@ -647,12 +647,15 @@ if($mybb->input['action2'] == "do_upload")
 		}
 		
 		$readme = pluginuploader_load_readme($path);
+
+		$author = '<a href="'.$info['authorsite'].'" target="_blank">'.$info['author'].'</a>';
+		$website = '<a href="'.$info['website'].'" target="_blank">'.$info['website'].'</a>';
 		
 		$page->add_breadcrumb_item($lang->pluginuploader_plugin_info);
 		$page->output_header($lang->pluginuploader);
 		
-		$form = new Form("index.php?module=config-plugins&action=pluginuploader&amp;action2=do_upload&amp;do=import", "post", "", 1, "", "", "submit = document.getElementById('submit'); submit.style.color = '#CCCCCC'; submit.style.border = '1px double #CCCCCC'; submit.disabled = 'disabled';");
-		$form_container = new FormContainer($lang->pluginuploader_upload_plugin);
+		$form = new Form("index.php?module=config-plugins&action=pluginuploader&amp;action2=do_upload&amp;do=import", "post", "", 1, "", "", "submit = document.getElementById('submit'); submit.style.color = '#CCCCCC'; submit.style.border = '1px solid #CCCCCC'; submit.disabled = 'disabled';");
+		$form_container = new FormContainer($lang->pluginuploader_upload_plugin.' - '.$info['name']);
 		
 		// does this file already exist?
 		if(file_exists(MYBB_ROOT . "inc/plugins/" . $plugin_name . ".php"))
@@ -696,8 +699,10 @@ if($mybb->input['action2'] == "do_upload")
 			
 			$form_container->output_row("", "", $plugin_exists_message);
 			$form_container->output_row($lang->pluginuploader_plugin_name, "", $info['name']);
-			$form_container->output_row($lang->pluginuploader_plugin_version, "", $info['version'] . $plugin_version_extra);
 			$form_container->output_row($lang->pluginuploader_plugin_description, "", $info['description']);
+			$form_container->output_row($lang->pluginuploader_plugin_version, "", $info['version'] . $plugin_version_extra);
+			$form_container->output_row($lang->pluginuploader_plugin_author, "", $author);
+			$form_container->output_row($lang->pluginuploader_plugin_website, "", $website);
 			if(!empty($screenshots))
 			{
 				pluginuploader_show_screenshots($screenshots, $form_container);
@@ -724,8 +729,10 @@ if($mybb->input['action2'] == "do_upload")
 			}
 			
 			$form_container->output_row($lang->pluginuploader_plugin_name, "", $info['name']);
-			$form_container->output_row($lang->pluginuploader_plugin_version, "", $info['version']);
 			$form_container->output_row($lang->pluginuploader_plugin_description, "", $info['description']);
+			$form_container->output_row($lang->pluginuploader_plugin_version, "", $info['version']);
+			$form_container->output_row($lang->pluginuploader_plugin_author, "", $author);
+			$form_container->output_row($lang->pluginuploader_plugin_website, "", $website);
 			if(!empty($screenshots))
 			{
 				pluginuploader_show_screenshots($screenshots, $form_container);
@@ -907,30 +914,61 @@ elseif($mybb->input['action2'] == "install")
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 	}
 
-	$contents = file_get_contents('https://community.mybb.com/mods.php?action=download&pid='.$plugin);
-	if(strpos($contents, 'You have selected an invalid project.') !== false)
+	$view_contents = file_get_contents('https://community.mybb.com/mods.php?action=view&pid='.$plugin);
+	$download_contents = file_get_contents('https://community.mybb.com/mods.php?action=download&pid='.$plugin);
+	if(strpos($download_contents, 'You have selected an invalid project.') !== false)
 	{
 		flash_message($lang->sprintf($lang->pluginuploader_download_from_mods_invalid, $plugin), 'error');
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 	}
 
-	$doc = new DOMDocument();
-	@$doc->loadHTML($contents);
-	$xpath = new DOMXpath($doc);
-	preg_match('/MyBB Mods - Download (.*)/', $doc->textContent, $plugin_name);
+	$view = new DOMDocument();
+	$download = new DOMDocument();
+	@$view->loadHTML($view_contents);
+	@$download->loadHTML($download_contents);
+
+	preg_match('/MyBB Mods - (.*)/', $view->textContent, $plugin_name);
 	$plugin_name = $plugin_name[1];
-	preg_match('/License(.*)Latest Builds/s', $doc->textContent, $licence);
+
+	preg_match('/License(.*)Latest Builds/s', $download->textContent, $licence);
 	$licence = trim($licence[1]);
 	list($licence_name,$licence_content) = explode("\n", $licence, 2);
 	$licence_name = trim($licence_name);
 	$licence_content = trim(preg_replace('/\n[\s]+/', '', $licence_content));
-	preg_match('/MD5: ([a-zA-Z0-9]{32})/', $doc->textContent, $md5);
-	$md5 = $md5[1];
-	preg_match('/File Size: ([0-9\.]+\s[K|M]B)/', $doc->textContent, $size);
+
+	preg_match('/<div class="mods-primer-description">(.*)<\/div>/sU', $download_contents, $description_div);
+	preg_match('/<p>(.*)<\/p>/', $description_div[1], $description);
+	$description = $description[1];
+
+	preg_match('/Version: ([0-9\.]+)/', $view->textContent, $version);
+	$version = $version[1];
+
+	preg_match('/<a href="https:\/\/community.mybb.com\/user-([0-9]+).html">(.*)<\/a>/U', $view_contents, $author);
+	$author = '<a href="https://community.mybb.com/user-'.$author[1].'.html" target="_blank">'.$author[2].'</a>';
+
+	preg_match('/File Size: ([0-9\.]+\s[K|M]B)/', $download->textContent, $size);
 	$size = $size[1];
-	preg_match('/<input type="hidden" value="([a-zA-Z0-9]{32})" name="my_post_key">/', $contents, $mods_site_post_key);
+
+	$date_regex = '([0-9]{2})-([0-9]{2})-([0-9]{4}), ([0-9]{2}):([0-9]{2}) ([A|P]M)';
+	preg_match('/<strong>Submitted:<\/strong> '.$date_regex.'<br \/>/', $view_contents, $date_submitted);
+	$date_submitted = my_date('jS F Y, H:i', mktime(($date_submitted[6]=='PM'?$date_submitted[4]+12:$date_submitted[4]), $date_submitted[5], 0, $date_submitted[1], $date_submitted[2], $date_submitted[3]));
+	preg_match('/<strong>Date Uploaded:<\/strong> '.$date_regex.'<br \/>/', $download_contents, $date_build);
+	$date_build = my_date('jS F Y, H:i', mktime(($date_build[6]=='PM'?$date_build[4]+12:$date_build[4]), $date_build[5], 0, $date_build[1], $date_build[2], $date_build[3]));
+	preg_match('/<strong>Last Updated:<\/strong> '.$date_regex.'<br \/>/', $view_contents, $date_updated);
+	$date_updated = my_date('jS F Y, H:i', mktime(($date_updated[6]=='PM'?$date_updated[4]+12:$date_updated[4]), $date_updated[5], 0, $date_updated[1], $date_updated[2], $date_updated[3]));
+
+	preg_match_all('/<a id="previews" rel="previews" href="(.*)" target="_blank"><img src="(.*)" \/><\/a>/', $view_contents, $screenshots);
+	$screenshots = $screenshots[1];
+
+	// todo - downloads, verified developer, recommendations
+
+	preg_match('/MD5: ([a-zA-Z0-9]{32})/', $download->textContent, $md5);
+	$md5 = $md5[1];
+
+	preg_match('/<input type="hidden" value="([a-zA-Z0-9]{32})" name="my_post_key">/', $download_contents, $mods_site_post_key);
 	$mods_site_post_key = $mods_site_post_key[1];
-	preg_match('/<input type="hidden" value="([0-9]+)" name="bid">/', $contents, $bid);
+
+	preg_match('/<input type="hidden" value="([0-9]+)" name="bid">/', $download_contents, $bid);
 	$bid = $bid[1];
 
 	// check if PHP will be able to move the files, and if it can't, see if we have an FTP connection; if we don't, redirect to the FTP details page
@@ -965,8 +1003,23 @@ elseif($mybb->input['action2'] == "install")
 	$plugins->run_hooks("admin_config_plugins_tabs", $sub_tabs);
 	
 	$page->output_nav_tabs($sub_tabs, 'upload_plugin');
+
+	$form_container = new FormContainer($lang->pluginuploader_import_plugin.' - '.$plugin_name);
+	$form_container->output_row($lang->pluginuploader_plugin_name, "", '<a href="https://community.mybb.com/mods.php?action=view&pid='.$plugin.'" target="_blank">'.$plugin_name.'</a>');
+	$form_container->output_row($lang->pluginuploader_plugin_description, "", $description);
+	$form_container->output_row($lang->pluginuploader_plugin_version, "", $version);
+	$form_container->output_row($lang->pluginuploader_plugin_author, "", $author);
+	$form_container->output_row($lang->pluginuploader_plugin_size, "", $size);
+	$form_container->output_row($lang->pluginuploader_plugin_date_submitted, "", $date_submitted);
+	$form_container->output_row($lang->pluginuploader_plugin_date_build, "", $date_build);
+	$form_container->output_row($lang->pluginuploader_plugin_date_updated, "", $date_updated);
+	if(!empty($screenshots))
+	{
+		pluginuploader_show_screenshots($screenshots, $form_container, true);
+	}
+	$form_container->end();
 	
-	$form = new Form("index.php?module=config-plugins&action=pluginuploader&amp;action2=do_install", "post", "", 1, "", "", "submit = document.getElementById('submit'); submit.style.color = '#CCCCCC'; submit.style.border = '1px double #CCCCCC'; submit.disabled = 'disabled';");
+	$form = new Form("index.php?module=config-plugins&action=pluginuploader&amp;action2=do_install", "post", "", 1, "", "", "submit = document.getElementById('submit'); submit.style.color = '#CCCCCC'; submit.style.border = '1px solid #CCCCCC'; submit.disabled = 'disabled';");
 	$form_container = new FormContainer($lang->sprintf($lang->pluginuploader_licence, $plugin_name));
 	
 	$form_container->output_row($lang->pluginuploader_licence_desc, '', $licence_name.'<br /><br />'.nl2br($licence_content));
@@ -1456,7 +1509,7 @@ else
 		
 		echo '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XKSCRPTRJ7KJE" target="_blank" style="position: absolute; margin-top: 45px; right: 25px;"><img src="https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif" alt="Donate" title="Donate" /></a>';
 		
-		$form = new Form("index.php?module=config-plugins&amp;action=pluginuploader&amp;action2=do_upload", "post", "", 1, "", "", "submit = document.getElementById('submit'); submit.style.color = '#CCCCCC'; submit.style.border = '3px double #CCCCCC'; submit.disabled = 'disabled';");
+		$form = new Form("index.php?module=config-plugins&amp;action=pluginuploader&amp;action2=do_upload", "post", "", 1, "", "", "submit = document.getElementById('submit'); submit.style.color = '#CCCCCC'; submit.style.border = '1px solid #CCCCCC'; submit.disabled = 'disabled';");
 		$form_container = new FormContainer($lang->pluginuploader_upload_plugin);
 		
 		$plugin_url = '';
@@ -2104,14 +2157,18 @@ function pluginuploader_load_screenshots($path, $get_files = false)
 	}
 }
 
-function pluginuploader_show_screenshots($screenshots, &$form_container)
+function pluginuploader_show_screenshots($screenshots, &$form_container, $mods_site = false)
 {
 	global $mybb, $lang;
 	
 	$images = "";
 	foreach($screenshots as $screenshot)
 	{
-		$images .= "<a href=\"{$mybb->settings['bburl']}/{$screenshot}\" target=\"_blank\"><img src=\"{$mybb->settings['bburl']}/{$screenshot}\" alt=\"\" height=\"200px\" style=\"border: 3px double #0F5C8E;\" /></a>&nbsp;";
+		if(!$mods_site)
+		{
+			$screenshot = $mybb->settings['bburl'].'/'.$screenshot;
+		}
+		$images .= "<a href=\"{$screenshot}\" target=\"_blank\"><img src=\"{$screenshot}\" alt=\"\" height=\"200px\" style=\"border: 1px solid #CCCCCC;\" /></a>&nbsp;";
 	}
 	
 	$form_container->output_row($lang->pluginuploader_plugin_screenshots, $lang->pluginuploader_plugin_screenshots_desc, $images);
