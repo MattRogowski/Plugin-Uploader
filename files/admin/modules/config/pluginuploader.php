@@ -893,10 +893,18 @@ elseif($mybb->input['action2'] == "do_install")
 	
 	if(!empty($result) && @file_put_contents(MYBB_ROOT.'inc/plugins/temp/'.$plugin_id.'.zip', $result))
 	{
-		update_admin_session('pluginuploader_import_source', 'modssite');
+		if(md5_file(MYBB_ROOT.'inc/plugins/temp/'.$plugin_id.'.zip') == $mybb->input['md5'])
+		{
+			update_admin_session('pluginuploader_import_source', 'modssite');
 		
-		flash_message($lang->pluginuploader_downloaded_from_mods, 'success');
-		admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=do_upload&from_mods_site=1&plugin_name=".$plugin_id."&my_post_key={$mybb->post_code}");
+			flash_message($lang->pluginuploader_downloaded_from_mods, 'success');
+			admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=do_upload&from_mods_site=1&plugin_name=".$plugin_id."&my_post_key={$mybb->post_code}");
+		}
+		else
+		{
+			flash_message($lang->sprintf($lang->pluginuploader_error_downloading_from_mods_md5, $plugin_name).'<br /><br />'.$lang->pluginuploader_error_downloading_from_mods_unknown_error, 'error');
+			admin_redirect("index.php?module=config-plugins&action=pluginuploader");
+		}
 	}
 	else
 	{
@@ -1026,6 +1034,7 @@ elseif($mybb->input['action2'] == "install")
 	
 	echo $form->generate_hidden_field("plugin_id", $plugin);
 	echo $form->generate_hidden_field("plugin_name", $plugin_name);
+	echo $form->generate_hidden_field("md5", $md5);
 	echo $form->generate_hidden_field("bid", $bid);
 	echo $form->generate_hidden_field("mods_site_post_key", $mods_site_post_key);
 	
