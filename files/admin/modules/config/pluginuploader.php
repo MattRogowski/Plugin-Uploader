@@ -651,7 +651,7 @@ if($mybb->input['action2'] == "do_upload")
 		$page->add_breadcrumb_item($lang->pluginuploader_plugin_info);
 		$page->output_header($lang->pluginuploader);
 		
-		$form = new Form("index.php?module=config-plugins&action=pluginuploader&amp;action2=do_upload&amp;do=import", "post", "", 1, "", "", "submit = document.getElementById('submit'); submit.style.color = '#CCCCCC'; submit.style.border = '3px double #CCCCCC'; submit.disabled = 'disabled';");
+		$form = new Form("index.php?module=config-plugins&action=pluginuploader&amp;action2=do_upload&amp;do=import", "post", "", 1, "", "", "submit = document.getElementById('submit'); submit.style.color = '#CCCCCC'; submit.style.border = '1px double #CCCCCC'; submit.disabled = 'disabled';");
 		$form_container = new FormContainer($lang->pluginuploader_upload_plugin);
 		
 		// does this file already exist?
@@ -2111,7 +2111,7 @@ function pluginuploader_show_screenshots($screenshots, &$form_container)
 	$images = "";
 	foreach($screenshots as $screenshot)
 	{
-		$images .= "<a href=\"{$mybb->settings['bburl']}/{$screenshot}\" target=\"_blank\"><img src=\"{$mybb->settings['bburl']}/{$screenshot}\" alt=\"\" width=\"150px;\" height=\"100px\" style=\"border: 3px double #0F5C8E;\" /></a>&nbsp;";
+		$images .= "<a href=\"{$mybb->settings['bburl']}/{$screenshot}\" target=\"_blank\"><img src=\"{$mybb->settings['bburl']}/{$screenshot}\" alt=\"\" height=\"200px\" style=\"border: 3px double #0F5C8E;\" /></a>&nbsp;";
 	}
 	
 	$form_container->output_row($lang->pluginuploader_plugin_screenshots, $lang->pluginuploader_plugin_screenshots_desc, $images);
