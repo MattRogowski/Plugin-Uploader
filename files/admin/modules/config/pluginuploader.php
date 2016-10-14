@@ -622,7 +622,7 @@ if($mybb->input['action2'] == "do_upload")
 
 			$table = new Table;
 			
-			$table->construct_cell($lang->sprintf($lang->pluginuploader_new_version_warning, $info['name'], $info['version'], $mods_site_version['version'], $plugin_id[1], $mybb->post_code));
+			$table->construct_cell($lang->sprintf($lang->pluginuploader_new_version_warning, $info['name'], $info['version'], $mods_site_version['version'], $plugin_id[1], $mods_site_version['download'], $mybb->post_code));
 			$table->construct_row();
 			
 			$new_version = $table->output("", 1, "general", true);
