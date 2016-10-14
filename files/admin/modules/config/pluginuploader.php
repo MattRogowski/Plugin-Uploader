@@ -586,10 +586,10 @@ if($mybb->input['action2'] == "do_upload")
 		}
 		
 		// plugin is from the MyBB Mods site, check the version
-		if(array_key_exists("guid", $info))
+		if(array_key_exists("codename", $info))
 		{
 			$mods_site_version = array();
-			$url = "http://mods.mybb.com/version_check.php?info[]=" . urlencode($info['guid']);
+			$url = "https://community.mybb.com/version_check.php?info[]=" . urlencode($info['codename']);
 			
 			$contents = @fetch_remote_file($url);
 			
@@ -618,9 +618,11 @@ if($mybb->input['action2'] == "do_upload")
 		$new_version = null;
 		if(!empty($mods_site_version))
 		{
+			preg_match('/([0-9]+)$/', $mods_site_version['download'], $plugin_id);
+
 			$table = new Table;
 			
-			$table->construct_cell($lang->sprintf($lang->pluginuploader_new_version_warning, $info['name'], $info['version'], $mods_site_version['version'], $mods_site_version['download'], $mybb->post_code));
+			$table->construct_cell($lang->sprintf($lang->pluginuploader_new_version_warning, $info['name'], $info['version'], $mods_site_version['version'], $plugin_id[1], $mybb->post_code));
 			$table->construct_row();
 			
 			$new_version = $table->output("", 1, "general", true);

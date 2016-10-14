@@ -405,7 +405,7 @@ function pluginuploader_admin_config_plugins_plugin_list()
 		return;
 	}
 	
-	$url = "http://community.mybb.com/version_check.php?";
+	$url = "https://community.mybb.com/version_check.php?";
 	$url .= http_build_query(array("info" => $info))."&";
 	require_once MYBB_ROOT."inc/class_xml.php";
 	$contents = fetch_remote_file($url);
