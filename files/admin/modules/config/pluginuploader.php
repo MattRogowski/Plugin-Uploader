@@ -161,14 +161,13 @@ if($mybb->input['action2'] == "do_upload")
 					update_admin_session('pluginuploader_import_source', 'url');
 					
 					// check if it's a Mods Site URL
-					$is_mods_site = preg_match('#mods.(mybb.com|mybboard.net)/(view|download)#', $mybb->input['plugin_url']);
+					$is_mods_site = preg_match('#community\.mybb\.com/mods\.php\?action=(view|download)&pid=([0-9]+)#', $mybb->input['plugin_url'], $plugin_url_info);
 					if($is_mods_site)
 					{
 						// if it is, get the name
-						preg_match('#mods.(mybb.com|mybboard.net)/(view|download)/([a-zA-Z0-9\-]+)#', $mybb->input['plugin_url'], $plugin_url_info);
-						if($plugin_url_info[3])
+						if($plugin_url_info[2])
 						{
-							admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=install&plugin=".$plugin_url_info[3]."&my_post_key={$mybb->post_code}");
+							admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=install&plugin=".$plugin_url_info[2]."&my_post_key={$mybb->post_code}");
 						}
 						// if there's not a valid name, strip out everything to just leave the name that was given and put it into the error message
 						else
