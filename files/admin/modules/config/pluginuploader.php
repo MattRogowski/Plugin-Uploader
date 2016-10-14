@@ -397,12 +397,6 @@ if($mybb->input['action2'] == "do_upload")
 			{
 				pluginuploader_move_files($root, 'upgrade');
 				
-				$import_source = $admin_session['data']['pluginuploader_import_source'];
-				if($mybb->cookies['mybb_pluginuploader_send_usage_stats'] != 'no')
-				{
-					pluginuploader_send_usage_stats($plugin_name, $import_source);
-				}
-				
 				flash_message($lang->pluginuploader_upgraded, 'success');
 				admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 			}
@@ -621,7 +615,7 @@ if($mybb->input['action2'] == "do_upload")
 			}
 		}
 		
-		$new_version;
+		$new_version = null;
 		if(!empty($mods_site_version))
 		{
 			$table = new Table;
@@ -860,12 +854,16 @@ elseif($mybb->input['action2'] == "do_install")
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 	}
 	
-	$plugin_name = $mybb->input['plugin'];
+	$plugin_id = $mybb->input['plugin_id'];
+	$plugin_name = $mybb->input['plugin_name'];
 	
-	$url = 'http://mods.mybb.com/download';
+	$url = 'https://community.mybb.com/mods.php';
 	$fields = array(
-		'friendly_name' => urlencode($plugin_name),
-		'agree' => urlencode('I Agree')
+		'action' => 'download',
+		'my_post_key' => $mybb->input['mods_site_post_key'],
+		'pid' => $plugin_id,
+		'bid' => $mybb->input['bid'],
+		'agree' => '1'
 	);
 	
 	foreach($fields as $key=>$value)
@@ -874,75 +872,28 @@ elseif($mybb->input['action2'] == "do_install")
 	}
 	rtrim($fields_string, '&');
 	
-	$zip_name = '';
 	$result = '';
-	$mods_site_type = pluginuploader_can_use_mods_site(true);
-	if($mods_site_type != 'none')
+	if(pluginuploader_can_use_mods_site())
 	{
-		if($mods_site_type == 'cURL')
-		{
-			$ch = curl_init();
-			curl_setopt($ch,CURLOPT_URL,$url);
-			curl_setopt($ch,CURLOPT_POST,count($fields));
-			curl_setopt($ch,CURLOPT_POSTFIELDS,$fields_string);
-			curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
-			curl_setopt($ch,CURLOPT_HEADER,true);
-			$result = curl_exec($ch);
-			$result = explode("\n", $result);
-			curl_close($ch);
-			foreach($result as $header)
-			{
-				if(substr($header, 0, 9) == 'Location:')
-				{
-					$zip_name = trim(substr($header, 9));
-					break;
-				}
-			}
-			$result = '';
-			if(!empty($zip_name))
-			{
-				$result = fetch_remote_file('http://mods.mybb.com/'.$zip_name);
-			}
-		}
-		elseif($mods_site_type == 'stream')
-		{
-			$params = array(
-				'http' => array(
-					'method' => 'POST',
-					'content' => $fields_string
-				)
-			); 
-			$scc = @stream_context_create($params);
-			$fp = @fopen($url, 'rb', false, $scc);
-			foreach($http_response_header as $header)
-			{
-				if(substr($header, 0, 9) == 'Location:')
-				{
-					$zip_name = trim(substr($header, 9));
-					break;
-				}
-			}
-			$fp = @fopen('http://mods.mybb.com/'.$zip_name, 'rb');
-			$result = @stream_get_contents($fp);
-		}
+		$ch = curl_init();
+		curl_setopt($ch,CURLOPT_URL,$url);
+		curl_setopt($ch,CURLOPT_POST,count($fields));
+		curl_setopt($ch,CURLOPT_POSTFIELDS,$fields_string);
+		curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+		$result = curl_exec($ch);
 	}
 	
-	if(empty($result))
-	{
-		flash_message($lang->sprintf($lang->pluginuploader_error_downloading_from_mods, $plugin_name).'<br /><br />'.$lang->pluginuploader_error_downloading_from_mods_unknown_error, 'error');
-		admin_redirect("index.php?module=config-plugins&action=pluginuploader");
-	}
-	elseif(!@file_put_contents(MYBB_ROOT.'inc/plugins/temp/'.$plugin_name.'.zip', $result))
-	{
-		flash_message($lang->pluginuploader_error_temp_dir, 'error');
-		admin_redirect("index.php?module=config-plugins&action=pluginuploader");
-	}
-	else
+	if(!empty($result) && @file_put_contents(MYBB_ROOT.'inc/plugins/temp/'.$plugin_id.'.zip', $result))
 	{
 		update_admin_session('pluginuploader_import_source', 'modssite');
 		
 		flash_message($lang->pluginuploader_downloaded_from_mods, 'success');
-		admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=do_upload&from_mods_site=1&plugin_name=".$plugin_name."&my_post_key={$mybb->post_code}");
+		admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=do_upload&from_mods_site=1&plugin_name=".$plugin_id."&my_post_key={$mybb->post_code}");
+	}
+	else
+	{
+		flash_message($lang->sprintf($lang->pluginuploader_error_downloading_from_mods, $plugin_name).'<br /><br />'.$lang->pluginuploader_error_downloading_from_mods_unknown_error, 'error');
+		admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 	}
 }
 elseif($mybb->input['action2'] == "install")
@@ -954,33 +905,39 @@ elseif($mybb->input['action2'] == "install")
 		flash_message($lang->sprintf($lang->pluginuploader_error_downloading_from_mods, $plugin).'<br /><br />'.$error_message, 'error');
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 	}
-	
-	$info_div = fetch_remote_file("http://mods.mybb.com/view/" . $plugin);
-	preg_match_all("#<h3>(.*?)</h3>#s", $info_div, $info);
-	$plugin_name = $info[1][3];
-	
-	$licence_div = fetch_remote_file("http://mods.mybb.com/download/" . $plugin);
-	preg_match("#<div id=\"page\">(.*?)</div>#s", $licence_div, $licence);
-	preg_match("#<p>(.*?)</p>#s", $licence[0], $content);
-	$licence_content = $content[0];
-	
-	if(strpos($licence_content, 'The download you are attempting to download appears to be invalid.') !== false)
+
+	$contents = file_get_contents('https://community.mybb.com/mods.php?action=download&pid='.$plugin);
+	if(strpos($contents, 'You have selected an invalid project.') !== false)
 	{
 		flash_message($lang->sprintf($lang->pluginuploader_download_from_mods_invalid, $plugin), 'error');
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 	}
-	
+
+	$doc = new DOMDocument();
+	@$doc->loadHTML($contents);
+	$xpath = new DOMXpath($doc);
+	preg_match('/MyBB Mods - Download (.*)/', $doc->textContent, $plugin_name);
+	$plugin_name = $plugin_name[1];
+	preg_match('/License(.*)Latest Builds/s', $doc->textContent, $licence);
+	$licence = trim($licence[1]);
+	list($licence_name,$licence_content) = explode("\n", $licence, 2);
+	$licence_name = trim($licence_name);
+	$licence_content = trim(preg_replace('/\n[\s]+/', '', $licence_content));
+	preg_match('/MD5: ([a-zA-Z0-9]{32})/', $doc->textContent, $md5);
+	$md5 = $md5[1];
+	preg_match('/File Size: ([0-9\.]+\s[K|M]B)/', $doc->textContent, $size);
+	$size = $size[1];
+	preg_match('/<input type="hidden" value="([a-zA-Z0-9]{32})" name="my_post_key">/', $contents, $mods_site_post_key);
+	$mods_site_post_key = $mods_site_post_key[1];
+	preg_match('/<input type="hidden" value="([0-9]+)" name="bid">/', $contents, $bid);
+	$bid = $bid[1];
+
 	// check if PHP will be able to move the files, and if it can't, see if we have an FTP connection; if we don't, redirect to the FTP details page
 	if(!$pluginuploader->pluginuploader_copy_test() && !$pluginuploader->ftp_connect())
 	{
 		update_admin_session('pluginuploader_mods_site_plugin', $plugin);
 		flash_message($lang->pluginuploader_ftp_required_desc.$lang->sprintf($lang->pluginuploader_error_downloading_from_mods_ftp_desc, $plugin_name), 'error');
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=ftp_details");
-	}
-	
-	if(empty($licence_content) || md5($licence_content) == 'd97623d172f087d9640da9acd38830ff')
-	{
-		admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=do_install&plugin=".$plugin."&my_post_key={$mybb->post_code}");
 	}
 	
 	$page->output_header($lang->pluginuploader);
@@ -1008,12 +965,15 @@ elseif($mybb->input['action2'] == "install")
 	
 	$page->output_nav_tabs($sub_tabs, 'upload_plugin');
 	
-	$form = new Form("index.php?module=config-plugins&action=pluginuploader&amp;action2=do_install", "post", "", 1, "", "", "submit = document.getElementById('submit'); submit.style.color = '#CCCCCC'; submit.style.border = '3px double #CCCCCC'; submit.disabled = 'disabled';");
+	$form = new Form("index.php?module=config-plugins&action=pluginuploader&amp;action2=do_install", "post", "", 1, "", "", "submit = document.getElementById('submit'); submit.style.color = '#CCCCCC'; submit.style.border = '1px double #CCCCCC'; submit.disabled = 'disabled';");
 	$form_container = new FormContainer($lang->sprintf($lang->pluginuploader_licence, $plugin_name));
 	
-	$form_container->output_row($lang->pluginuploader_licence_desc, '', $licence_content);
+	$form_container->output_row($lang->pluginuploader_licence_desc, '', $licence_name.'<br /><br />'.nl2br($licence_content));
 	
-	echo $form->generate_hidden_field("plugin", $plugin);
+	echo $form->generate_hidden_field("plugin_id", $plugin);
+	echo $form->generate_hidden_field("plugin_name", $plugin_name);
+	echo $form->generate_hidden_field("bid", $bid);
+	echo $form->generate_hidden_field("mods_site_post_key", $mods_site_post_key);
 	
 	$form_container->end();
 	
@@ -1388,9 +1348,9 @@ else
 		'link' => "index.php?module=config-plugins&amp;action=browse",
 		'description' => $lang->browse_plugins_desc
 	);
-
+	
 	$plugins->run_hooks("admin_config_plugins_tabs", $sub_tabs);
-
+	
 	$page->output_nav_tabs($sub_tabs, 'upload_plugin');
 	
 	if(!DISABLE_PLUGINUPLOADER_PASSWORD)
@@ -2263,7 +2223,7 @@ function pluginuploader_send_usage_stats($plugin_codename = '', $import_source =
 	$stats['ftp_storage_location'] = $pluginuploader->use_ftp?$pluginuploader->details_storage_location:'';
 	$stats['plugin_codename'] = $plugin_codename;
 	$stats['import_source'] = $import_source;
-	$stats['can_use_mods_site'] = pluginuploader_can_use_mods_site(true);
+	$stats['can_use_mods_site'] = pluginuploader_can_use_mods_site()?1:0;
 	
 	fetch_remote_file('http://mattrogowski.co.uk/mybb/pluginuploader.php?action=stats', $stats);
 }
