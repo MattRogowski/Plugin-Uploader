@@ -23,6 +23,8 @@ if(!defined("IN_MYBB"))
 	exit;
 }
 
+define('PLUGINUPLOADER_VERSION', '1.2.0');
+
 $plugins->add_hook("admin_config_plugins_activate_commit", "pluginuploader_admin_config_plugins_activate_commit");
 $plugins->add_hook("admin_config_permissions", "pluginuploader_admin_config_permissions");
 $plugins->add_hook("admin_config_plugins_tabs", "pluginuploader_add_pluginuploader_tab");
@@ -40,7 +42,7 @@ function pluginuploader_info()
 		'website' => 'https://github.com/MattRogowski/Plugin-Uploader',
 		'author' => 'Matt Rogowski',
 		'authorsite' => 'https://matt.rogow.ski',
-		'version' => '1.2.0',
+		'version' => PLUGINUPLOADER_VERSION,
 		'compatibility' => '18*',
 		'codename' => 'pluginuploader'
 	);
@@ -461,7 +463,7 @@ function pluginuploader_admin_config_plugins_plugin_list()
 		}
 	}
 
-	$pluginuploader_js = '<script src="jscripts/pluginuploader.js"></script>';
+	$pluginuploader_js = '<script src="jscripts/pluginuploader.js?version='.PLUGINUPLOADER_VERSION.'"></script>';
 	$pluginuploader_js .= '<script>
 	var pluginuploader_section = \'list\';
 	var plugin_download_urls = '.json_encode($plugin_urls).';
@@ -489,7 +491,7 @@ function pluginuploader_admin_config_plugins_check_browse()
 			break;
 	}
 
-	$pluginuploader_js = '<script src="jscripts/pluginuploader.js"></script>';
+	$pluginuploader_js = '<script src="jscripts/pluginuploader.js?version='.PLUGINUPLOADER_VERSION.'"></script>';
 	$pluginuploader_js .= '<script>
 	var pluginuploader_section = \''.$mybb->input['action'].'\';
 	var mybb_post_key = \''.$mybb->post_code.'\';

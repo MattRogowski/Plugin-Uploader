@@ -1167,7 +1167,7 @@ elseif($mybb->input['action2'] == "ftp_details")
 	$form = new Form("index.php?module=config-plugins&amp;action=pluginuploader&amp;action2=ftp_details", "post");
 	$form_container = new FormContainer($lang->pluginuploader_ftp_details);
 	
-	echo '<script src="jscripts/pluginuploader.js"></script>';
+	echo '<script src="jscripts/pluginuploader.js?version='.PLUGINUPLOADER_VERSION.'"></script>';
 	
 	$storage_location_options = array(
 		'' => '',
@@ -1443,7 +1443,7 @@ else
 			margin: 10px 0px;
 		}
 		</style>";
-		echo '<script src="jscripts/pluginuploader.js"></script>';
+		echo '<script src="jscripts/pluginuploader.js?version='.PLUGINUPLOADER_VERSION.'"></script>';
 		
 		echo '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XKSCRPTRJ7KJE" target="_blank" style="position: absolute; margin-top: 45px; right: 25px;"><img src="https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif" alt="Donate" title="Donate" /></a>';
 		
