@@ -3,7 +3,7 @@ Description: Allows you to import .zip plugin archives directly and have the fil
 Website: https://github.com/MattRogowski/Plugin-Uploader
 Author: Matt Rogowski
 Authorsite: https://matt.rogow.ski
-Version: 1.2.0
+Version: 1.2.1
 Compatibility: 1.8.x
 Files: 4
 Database changes: 1 new table, 1 new column to one table
@@ -21,11 +21,13 @@ Go to ACP > Configuration > Plugins > Upload Plugin
 Information:
 This plugin will allow you to import a plugin .zip or .php file directly to the ACP and have the files moved to their correct locations.
 
+Plugins can also be imported directly from the MyBB Mods site.
+
 For security, a password is required when uploading a plugin.
 
 It will try and show you screenshots of the plugin if any have been provided.
 
-If the plugin is from the MyBB Mods site, it will check that the version you are uploading is the latest version, and if it's not, will give you the download URL for the newer version.
+If the plugin is from the MyBB Mods site, it will check that the version you are uploading is the latest version, and if it's not, will give you the download URL for the newer version. It will also check for new versions on the plugins list.
 
 Allows you to delete all the files for a plugin (if the plugin was uploaded with this plugin uploader).
 
@@ -47,6 +49,7 @@ Change Log:
 27/05/12 - v1.1 -> v1.1.1 -> Fixed bug where loading a readme may cause an endless loop resulting in a PHP error. Fixed bug where readme file wouldn't be picked up if it had capital letters in the name. Fixed bug where readme wouldn't be shown when importing a new plugin. To upgrade, reupload ./admin/modules/config/pluginuploader.php and ./inc/languages/english/admin/config_pluginuploader.lang.php
 27/05/12 - v1.1.1 -> v1.1.2 -> The Plugin Uploader can now be upgraded via the Plugin Uploader. To upgrade, reupload ./inc/plugins/pluginuploader.php, ./admin/modules/config/pluginuploader.php and ./inc/languages/english/admin/config_pluginuploader.lang.php
 15/10/16 - v1.1.2 -> v1.2.0 -> MyBB 1.8 compatible. Core file edit no longer required (yay). Mods site import and zip upload preview pages now have more information and larger screenshots. To upgrade, reupload ./inc/plugins/pluginuploader.php, ./admin/modules/config/pluginuploader.php and ./inc/languages/english/admin/config_pluginuploader.lang.php, and upload ./admin/jscripts/pluginuploader.js
+15/10/16 - v1.2.0 -> v1.2.1 -> Marks plugins with updates on plugin list. To upgrade, reupload ./inc/plugins/pluginuploader.php, ./admin/modules/config/pluginuploader.php, ./inc/languages/english/admin/config_pluginuploader.lang.php, and ./admin/jscripts/pluginuploader.js
 
 Copyright 2016 Matthew Rogowski
 

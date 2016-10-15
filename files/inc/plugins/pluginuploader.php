@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Uploader 1.2.0
+ * Plugin Uploader 1.2.1
 
  * Copyright 2016 Matthew Rogowski
 
@@ -23,7 +23,7 @@ if(!defined("IN_MYBB"))
 	exit;
 }
 
-define('PLUGINUPLOADER_VERSION', '1.2.0');
+define('PLUGINUPLOADER_VERSION', '1.2.1');
 
 $plugins->add_hook("admin_config_plugins_activate_commit", "pluginuploader_admin_config_plugins_activate_commit");
 $plugins->add_hook("admin_config_permissions", "pluginuploader_admin_config_permissions");
