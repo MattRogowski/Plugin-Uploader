@@ -1042,18 +1042,18 @@ class PluginUploader
 		$ftp_key = $this->generate_config_ftp_key();
 		
 		$config_lines = explode("\n", file_get_contents(MYBB_ROOT.'inc/config.php'));
-		foreach($config_lines as &$line)
+		foreach($config_lines as $i => &$line)
 		{
 			if(strpos($line, 'pluginuploader_ftp_key') !== false)
 			{
 				$line = '$config[\'pluginuploader_ftp_key\'] = \''.$ftp_key.'\';';
 				break;
 			}
-			elseif($line == '?>')
+			elseif(++$i == count($config_lines))
 			{
-				$line = '';
+				$config_lines[] = '';
+				$config_lines[] = '/* Plugin Uploader - FTP details encryption key */';
 				$config_lines[] = '$config[\'pluginuploader_ftp_key\'] = \''.$ftp_key.'\';';
-				$config_lines[] = '?>';
 			}
 		}
 		if(file_put_contents(MYBB_ROOT.'inc/config.php', implode("\n", $config_lines)))

@@ -147,14 +147,14 @@ if($mybb->input['action2'] == "do_upload")
 			}
 			else
 			{
-				if(isset($mybb->input['send_usage_stats']) && $mybb->input['send_usage_stats'] == 1)
+				/*if(isset($mybb->input['send_usage_stats']) && $mybb->input['send_usage_stats'] == 1)
 				{
 					my_setcookie('mybb_pluginuploader_send_usage_stats', 'yes');
 				}
 				else
 				{
 					my_setcookie('mybb_pluginuploader_send_usage_stats', 'no');
-				}
+				}*/
 				
 				if(!empty($mybb->input['plugin_url']))
 				{
@@ -810,10 +810,10 @@ if($mybb->input['action2'] == "do_upload")
 			admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 		}
 		$import_source = $admin_session['data']['pluginuploader_import_source'];
-		if($mybb->cookies['mybb_pluginuploader_send_usage_stats'] != 'no')
+		/*if($mybb->cookies['mybb_pluginuploader_send_usage_stats'] != 'no')
 		{
 			pluginuploader_send_usage_stats($plugin_name, $import_source);
-		}
+		}*/
 		switch($import_source)
 		{
 			case 'modssite':
@@ -1167,26 +1167,7 @@ elseif($mybb->input['action2'] == "ftp_details")
 	$form = new Form("index.php?module=config-plugins&amp;action=pluginuploader&amp;action2=ftp_details", "post");
 	$form_container = new FormContainer($lang->pluginuploader_ftp_details);
 	
-	$hide_ftp_cookie_expiry = '';
-	if($mybb->input['ftp_storage_location'] != 'cookie')
-	{
-		$hide_ftp_cookie_expiry = "$('ftp_cookie_expiry').hide();";
-	}
-	echo "<script type=\"text/javascript\">
-	document.observe(\"dom:loaded\", function() {
-		{$hide_ftp_cookie_expiry}
-		$('ftp_storage_location').observe('change', function() {
-			if(this.value == 'cookie')
-			{
-				$('ftp_cookie_expiry').show();
-			}
-			else
-			{
-				$('ftp_cookie_expiry').hide();
-			}
-		});
-	});
-	</script>";
+	echo '<script src="jscripts/pluginuploader.js"></script>';
 	
 	$storage_location_options = array(
 		'' => '',
@@ -1206,7 +1187,7 @@ elseif($mybb->input['action2'] == "ftp_details")
 	$form_container->output_row($lang->pluginuploader_ftp_user . " <em>*</em>", $lang->pluginuploader_ftp_user_desc, $form->generate_text_box("ftp_user", $mybb->input['ftp_user'], array('id' => 'ftp_user')));
 	$form_container->output_row($lang->pluginuploader_ftp_password . " <em>*</em>", $lang->pluginuploader_ftp_password_desc, $form->generate_password_box("ftp_password", $mybb->input['ftp_password']));
 	$form_container->output_row($lang->pluginuploader_ftp_storage_location . " <em>*</em>", $lang->pluginuploader_ftp_storage_location_desc, $form->generate_select_box("ftp_storage_location", $storage_location_options, $mybb->input['ftp_storage_location'], array('id' => 'ftp_storage_location')));
-	$form_container->output_row($lang->pluginuploader_ftp_cookie_expiry . " <em>*</em>", $lang->pluginuploader_ftp_cookie_expiry_desc, $form->generate_select_box("ftp_cookie_expiry", $cookie_expiry_options, $mybb->input['ftp_cookie_expiry']), '', array('id' => 'ftp_cookie_expiry'));
+	$form_container->output_row($lang->pluginuploader_ftp_cookie_expiry . " <em>*</em>", $lang->pluginuploader_ftp_cookie_expiry_desc, $form->generate_select_box("ftp_cookie_expiry", $cookie_expiry_options, $mybb->input['ftp_cookie_expiry'], array('id' => 'ftp_cookie_expiry')));
 	$form_container->end();
 	
 	$buttons[] = $form->generate_submit_button($lang->pluginuploader_ftp_test_connection_save, array("id" => "submit"));
@@ -1461,49 +1442,8 @@ else
 		.form_row {
 			margin: 10px 0px;
 		}
-		</style>
-		
-		<script type=\"text/javascript\">
-		document.observe(\"dom:loaded\", function() {
-			$('url_site_needs_login_checkbox').observe('change', function() {
-				$('url_site_needs_login').hide();
-				$('url_site_login').show();
-				$('has_site_login').value = 1;
-			});
-			$('url_site_doesnt_need_login').observe('click', function() {
-				$('url_site_needs_login').show();
-				$('url_site_login').hide();
-				$('has_site_login').value = 0;
-				$('url_site_needs_login_checkbox').checked = false;
-			});
-			if($('use_ftp_checkbox') != undefined)
-			{
-				$('use_ftp_checkbox').observe('click', function() {
-					if($('use_ftp_checkbox').checked)
-					{
-						use_ftp = 1;
-					}
-					else
-					{
-						use_ftp = 0;
-					}
-					window.location = 'index.php?module=config-plugins&action=pluginuploader&action2=use_ftp&use_ftp='+use_ftp;
-				});
-			}
-			$('send_usage_stats_more').observe('click', function() {
-				if(this.text == '".$lang->pluginuploader_stats_less."')
-				{
-					this.update('".$lang->pluginuploader_stats_more."');
-					$('send_usage_stats_more_info').hide();
-				}
-				else
-				{
-					this.update('".$lang->pluginuploader_stats_less."');
-					$('send_usage_stats_more_info').show();
-				}
-			});
-		});
-		</script>";
+		</style>";
+		echo '<script src="jscripts/pluginuploader.js"></script>';
 		
 		echo '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XKSCRPTRJ7KJE" target="_blank" style="position: absolute; margin-top: 45px; right: 25px;"><img src="https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif" alt="Donate" title="Donate" /></a>';
 		
@@ -1621,7 +1561,7 @@ else
 				$ftp_message = 'pluginuploader_ftp_missing_test_file';
 			}
 			$ftp_message = "<span style=\"color: {$ftp_message_colour}; font-weight: bold;\">".$lang->$ftp_message.$config_code.$br."</span>";
-			$ftp_content = $pluginuploader_ftp_desc.$ftp_message.$ftp_details_stored_location.$pluginuploader_ftp_desc_links.$lang->pluginuploader_ftp_desc_extra;
+			$ftp_content = $pluginuploader_ftp_desc.$ftp_message.$ftp_details_stored_location.$pluginuploader_ftp_desc_links;
 		}
 		else
 		{
@@ -1638,17 +1578,17 @@ else
 				$ftp_content_style = '';
 				$use_ftp_checked = true;
 			}
-			$ftp_content = $pluginuploader_ftp_desc.'<label for="use_ftp_checkbox" style="font-weight: normal;">'.$lang->pluginuploader_use_ftp.'</label>'.$form->generate_check_box('use_ftp_checkbox', 1, '', array('id' => 'use_ftp_checkbox', 'checked' => $use_ftp_checked)).'<br /><br /><span'.$ftp_content_style.'>'.$ftp_message.$ftp_details_stored_location.$pluginuploader_ftp_desc_links.'</span>'.$lang->pluginuploader_ftp_desc_extra;
+			$ftp_content = $pluginuploader_ftp_desc.'<label for="use_ftp_checkbox" style="font-weight: normal;">'.$lang->pluginuploader_use_ftp.'</label>'.$form->generate_check_box('use_ftp_checkbox', 1, '', array('id' => 'use_ftp_checkbox', 'checked' => $use_ftp_checked)).'<span'.$ftp_content_style.'><br /><br />'.$ftp_message.$ftp_details_stored_location.$pluginuploader_ftp_desc_links.'</span>';
 		}
 		$form_container->output_row($pluginuploader_ftp_title, "", $ftp_content);
 		
-		$checked = true;
+		/*$checked = true;
 		$send_usage_stats = $mybb->cookies['mybb_pluginuploader_send_usage_stats'];
 		if($send_usage_stats == 'no')
 		{
 			$checked = false;
 		}
-		$form_container->output_row('', '', $form->generate_check_box("send_usage_stats", 1, '', array('checked' => $checked)).$lang->pluginuploader_stats."<br /><br />".$lang->pluginuploader_stats_desc.' <a href="javascript:void(0)" id="send_usage_stats_more">'.$lang->pluginuploader_stats_more.'</a><div id="send_usage_stats_more_info" style="display: none; font-style: italic;"><br />'.$lang->pluginuploader_stats_more_info.'</div>');
+		$form_container->output_row('', '', $form->generate_check_box("send_usage_stats", 1, '', array('checked' => $checked)).$lang->pluginuploader_stats."<br /><br />".$lang->pluginuploader_stats_desc.' <a href="javascript:void(0)" id="send_usage_stats_more">'.$lang->pluginuploader_stats_more.'</a><div id="send_usage_stats_more_info" style="display: none; font-style: italic;"><br />'.$lang->pluginuploader_stats_more_info.'</div>');*/
 		
 		$form_container->end();
 		
