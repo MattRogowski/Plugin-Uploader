@@ -368,7 +368,7 @@ function pluginuploader_admin_config_plugins_plugin_list()
 	global $mybb, $lang, $plugins, $plugin_urls, $pluginuploader_js;
 	
 	$plugins_list = get_plugins_list();
-	$info = array();
+	$plugin_codenames = $info = array();
 
 	if($plugins_list)
 	{
@@ -377,6 +377,7 @@ function pluginuploader_admin_config_plugins_plugin_list()
 		{
 			require_once MYBB_ROOT."inc/plugins/".$plugin_file;
 			$codename = str_replace(".php", "", $plugin_file);
+			$plugin_codenames[] = $codename;
 			$infofunc = $codename."_info";
 			if(!function_exists($infofunc))
 			{
@@ -433,12 +434,30 @@ function pluginuploader_admin_config_plugins_plugin_list()
 		{
 			foreach($plugins_info as $item)
 			{
-				$plugin_urls[$names[$item['attributes']['codename']]['name']] = array('codename' => $item['attributes']['codename'], 'url' => $item['download_url']['value']);
+				$plugin_urls[$names[$item['attributes']['codename']]['name']] = array('codename' => $item['attributes']['codename'], 'url' => $item['download_url']['value'], 'version' => $item['version']['value']);
 			}
 		}
 		else
 		{
-			$plugin_urls[$names[$plugins_info['attributes']['codename']]['name']] = array('codename' => $item['attributes']['codename'], 'url' => $plugins_info['download_url']['value']);
+			$plugin_urls[$names[$plugins_info['attributes']['codename']]['name']] = array('codename' => $item['attributes']['codename'], 'url' => $plugins_info['download_url']['value'], 'version' => $item['version']['value']);
+		}
+	}
+
+	foreach($plugin_urls as $name => &$info)
+	{
+		$info['update_available'] = false;
+		if(in_array($info['codename'], $plugin_codenames))
+		{
+			$infofunc = $info['codename']."_info";
+			if(!function_exists($infofunc))
+			{
+				continue;
+			}
+			$plugininfo = $infofunc();
+			if(version_compare($plugininfo['version'], $info['version']))
+			{
+				$info['update_available'] = true;
+			}
 		}
 	}
 
@@ -450,6 +469,7 @@ function pluginuploader_admin_config_plugins_plugin_list()
 	var mybb_post_key = \''.$mybb->post_code.'\';
 	var lang_delete = \''.$lang->delete.'\';
 	var lang_pluginuploader_reimport = \''.$lang->pluginuploader_reimport.'\';
+	var lang_pluginuploader_reimport_update = \''.$lang->pluginuploader_reimport_update.'\';
 	</script>';
 }
 

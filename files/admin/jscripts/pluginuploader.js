@@ -19,7 +19,19 @@ $(document).ready(function() {
 					{
 						if(can_use_mods_site)
 						{
-							a = $('<a />', {'text':lang_pluginuploader_reimport, 'href':'index.php?module=config-plugins&action=pluginuploader&action2=install&plugin='+plugin_download_info.url.match(/([0-9]+)$/)[1]+'&my_post_key='+mybb_post_key});
+							a_attrs = {
+								'href': 'index.php?module=config-plugins&action=pluginuploader&action2=install&plugin='+plugin_download_info.url.match(/([0-9]+)$/)[1]+'&my_post_key='+mybb_post_key
+							};
+							if(plugin_download_info.update_available)
+							{
+								a_attrs.html = lang_pluginuploader_reimport_update;
+								a_attrs.style = 'color:red';
+							}
+							else
+							{
+								a_attrs.html = lang_pluginuploader_reimport;
+							}
+							a = $('<a />', a_attrs);
 							td = $('<td />', {'class':'align_center','width':'150'});
 							$(td).append(a);
 						}

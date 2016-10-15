@@ -86,6 +86,7 @@ $l['pluginuploader_activated'] = "activated";
 $l['pluginuploader_deactivated'] = "deactivated";
 $l['pluginuploader_install'] = 'Install';
 $l['pluginuploader_reimport'] = 'Reimport from MyBB Mods Site';
+$l['pluginuploader_reimport_update'] = '<strong>Update Available</strong><br />Reimport from MyBB Mods Site';
 $l['pluginuploader_upgrade'] = 'Upgrade';
 $l['pluginuploader_mods_site_unavailable'] = 'Plugin Uploader Mods Site integration is unavailable (<a href="index.php?module=config-plugins&action=pluginuploader&action2=mods_site_integration">Why?</a>)';
 $l['pluginuploader_agree_and_download'] = 'Agree to Licence and Install';
