@@ -1,20 +1,20 @@
 Name: Plugin Uploader
 Description: Allows you to import .zip plugin archives directly and have the files extracted to their correct locations automatically.
-Website: http://mattrogowski.co.uk/mybb/plugins/plugin/plugin-uploader
-Author: MattRogowski
-Authorsite: http://mattrogowski.co.uk/mybb/
-Version: 1.1.2
-Compatibility: 1.6.x
-Files: 4 (plus 1 optional core file edit)
+Website: https://github.com/MattRogowski/Plugin-Uploader
+Author: Matt Rogowski
+Authorsite: https://matt.rogow.ski
+Version: 1.2.0
+Compatibility: 1.8.x
+Files: 4
 Database changes: 1 new table, 1 new column to one table
 
 To Install:
 Upload ./inc/plugins/pluginuploader.php to ./inc/plugins/
 Upload ./admin/modules/config/pluginuploader.php to ./admin/modules/config/
 Upload ./inc/languages/english/admin/config_pluginuploader.lang.php to ./inc/languages/english/admin/
+Upload ./admin/jscripts/pluginuploader.js to ./admin/jscripts/
 Create folder 'temp' in ./inc/plugins/ and CHMOD to 777.
 Upload ./inc/plugins/temp/test.php to ./inc/plugins/temp/
-Optional (but highly recommended) core file edit: Upload ./admin/modules/config/plugins.php to ./admin/modules/config/
 Go to ACP > Plugins > Install and Activate
 Go to ACP > Configuration > Plugins > Upload Plugin
 
@@ -46,8 +46,9 @@ Change Log:
 27/05/12 - v1.0.1 -> v1.1 -> Plugins can now be imported from the MyBB Mods Site or via a URL. FTP details are no longer stored in a file, but are encrypted in the database or a cookie instead. Method of moving files has been improved. Plugin imports are now logged to the admin log. Usage stats can now be sent. If a readme was included with the plugin it will be shown on the plugin information page when importing. Fixed a bug where the cookie storing the password may store the wrong one. Made it easier to clear the password cookie. To upgrade, reupload ./inc/plugins/pluginuploader.php, ./admin/modules/config/pluginuploader.php, ./inc/languages/english/admin/config_pluginuploader.lang.php and ./admin/modules/config/plugins.php (edited version of core file included with plugin).
 27/05/12 - v1.1 -> v1.1.1 -> Fixed bug where loading a readme may cause an endless loop resulting in a PHP error. Fixed bug where readme file wouldn't be picked up if it had capital letters in the name. Fixed bug where readme wouldn't be shown when importing a new plugin. To upgrade, reupload ./admin/modules/config/pluginuploader.php and ./inc/languages/english/admin/config_pluginuploader.lang.php
 27/05/12 - v1.1.1 -> v1.1.2 -> The Plugin Uploader can now be upgraded via the Plugin Uploader. To upgrade, reupload ./inc/plugins/pluginuploader.php, ./admin/modules/config/pluginuploader.php and ./inc/languages/english/admin/config_pluginuploader.lang.php
+15/10/16 - v1.1.2 -> v1.2.0 -> MyBB 1.8 compatible. Core file edit no longer required (yay). Mods site import and zip upload preview pages now have more information and larger screenshots. To upgrade, reupload ./inc/plugins/pluginuploader.php, ./admin/modules/config/pluginuploader.php and ./inc/languages/english/admin/config_pluginuploader.lang.php, and upload ./admin/jscripts/pluginuploader.js
 
-Copyright 2011 Matthew Rogowski
+Copyright 2016 Matthew Rogowski
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

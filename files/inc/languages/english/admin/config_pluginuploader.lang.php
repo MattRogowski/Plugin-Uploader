@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Uploader 1.1.2 - Admin Language File
+ * Plugin Uploader 1.2.0 - Admin Language File
 
- * Copyright 2010 Matthew Rogowski
+ * Copyright 2016 Matthew Rogowski
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

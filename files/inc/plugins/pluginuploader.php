@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Uploader 1.1.2
+ * Plugin Uploader 1.2.0
 
- * Copyright 2010 Matthew Rogowski
+ * Copyright 2016 Matthew Rogowski
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,12 @@ function pluginuploader_info()
 	return array(
 		'name' => 'Plugin Uploader',
 		'description' => 'Allows you to import .zip plugin archives directly and have the files extracted to their correct locations automatically.',
-		'website' => 'http://mattrogowski.co.uk/mybb/plugins/plugin/plugin-uploader',
-		'author' => 'MattRogowski',
-		'authorsite' => 'http://mattrogowski.co.uk/mybb/',
-		'version' => '1.1.2',
+		'website' => 'https://github.com/MattRogowski/Plugin-Uploader',
+		'author' => 'Matt Rogowski',
+		'authorsite' => 'https://matt.rogow.ski',
+		'version' => '1.2.0',
 		'compatibility' => '18*',
-		'guid' => 'bf2f8440a92b2c8dc841ec7dc1929ff4'
+		'codename' => 'pluginuploader'
 	);
 }
 
