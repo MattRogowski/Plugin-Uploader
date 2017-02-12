@@ -3,7 +3,7 @@ Description: Allows you to import .zip plugin archives directly and have the fil
 Website: https://github.com/MattRogowski/Plugin-Uploader
 Author: Matt Rogowski
 Authorsite: https://matt.rogow.ski
-Version: 1.2.1
+Version: 1.2.2
 Compatibility: 1.8.x
 Files: 4
 Database changes: 1 new table, 1 new column to one table
@@ -50,8 +50,9 @@ Change Log:
 27/05/12 - v1.1.1 -> v1.1.2 -> The Plugin Uploader can now be upgraded via the Plugin Uploader. To upgrade, reupload ./inc/plugins/pluginuploader.php, ./admin/modules/config/pluginuploader.php and ./inc/languages/english/admin/config_pluginuploader.lang.php
 15/10/16 - v1.1.2 -> v1.2.0 -> MyBB 1.8 compatible. Core file edit no longer required (yay). Mods site import and zip upload preview pages now have more information and larger screenshots. To upgrade, reupload ./inc/plugins/pluginuploader.php, ./admin/modules/config/pluginuploader.php and ./inc/languages/english/admin/config_pluginuploader.lang.php, and upload ./admin/jscripts/pluginuploader.js
 15/10/16 - v1.2.0 -> v1.2.1 -> Marks plugins with updates on plugin list. To upgrade, reupload ./inc/plugins/pluginuploader.php, ./admin/modules/config/pluginuploader.php, ./inc/languages/english/admin/config_pluginuploader.lang.php, and ./admin/jscripts/pluginuploader.js
+12/02/17 - v1.2.1 -> v1.2.2 -> Fix support with new Extend site. Adds download and star counts, and review status. To upgrade, reupload ./inc/plugins/pluginuploader.php, ./admin/modules/config/pluginuploader.php, and ./inc/languages/english/admin/config_pluginuploader.lang.php
 
-Copyright 2016 Matthew Rogowski
+Copyright 2017 Matthew Rogowski
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

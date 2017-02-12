@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Uploader 1.2.1
+ * Plugin Uploader 1.2.2
 
- * Copyright 2016 Matthew Rogowski
+ * Copyright 2017 Matthew Rogowski
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ if(!defined("IN_MYBB"))
 	exit;
 }
 
-define('PLUGINUPLOADER_VERSION', '1.2.1');
+define('PLUGINUPLOADER_VERSION', '1.2.2');
 
 $plugins->add_hook("admin_config_plugins_activate_commit", "pluginuploader_admin_config_plugins_activate_commit");
 $plugins->add_hook("admin_config_permissions", "pluginuploader_admin_config_permissions");
@@ -368,7 +368,7 @@ function pluginuploader_admin_config_plugins_begin()
 function pluginuploader_admin_config_plugins_plugin_list()
 {
 	global $mybb, $lang, $plugins, $plugin_urls, $pluginuploader_js;
-	
+
 	$plugins_list = get_plugins_list();
 	$plugin_codenames = $info = array();
 
@@ -407,7 +407,7 @@ function pluginuploader_admin_config_plugins_plugin_list()
 	{
 		return;
 	}
-	
+
 	$url = "https://community.mybb.com/version_check.php?";
 	$url .= http_build_query(array("info" => $info))."&";
 	require_once MYBB_ROOT."inc/class_xml.php";
@@ -417,7 +417,7 @@ function pluginuploader_admin_config_plugins_plugin_list()
 	{
 		return;
 	}
-	
+
 	$parser = new XMLParser($contents);
 	$tree = $parser->get_tree();
 
@@ -427,7 +427,7 @@ function pluginuploader_admin_config_plugins_plugin_list()
 	}
 
 	$lang->load("config_pluginuploader");
-	
+
 	$plugins_info = $tree['plugins']['plugin'];
 	$plugin_urls = array();
 	if(!empty($plugins_info))
@@ -541,13 +541,13 @@ class PluginUploader
 	public function __construct()
 	{
 		global $mybb, $db, $cache;
-		
+
 		$plugins_cache = $cache->read('plugins');
 		if(!is_array($plugins_cache['active']) || !in_array('pluginuploader', $plugins_cache['active']))
 		{
 			return;
 		}
-		
+
 		if($mybb->cookies['mybb_pluginuploader_ftp'])
 		{
 			$this->details_storage_location = 'cookie';
@@ -565,7 +565,7 @@ class PluginUploader
 				$this->set_ftp_details($this->decrypt($ftp_details['ftp_host']), $this->decrypt($ftp_details['ftp_user']), $this->decrypt($ftp_details['ftp_password']));
 			}
 		}
-		
+
 		if(!$this->pluginuploader_copy_test() || $mybb->cookies['mybb_pluginuploader_use_ftp'])
 		{
 			$this->use_ftp = true;
@@ -575,7 +575,7 @@ class PluginUploader
 			$this->use_ftp = false;
 		}
 	}
-	
+
 	public function set_ftp_details($host, $user, $password)
 	{
 		$this->ftp_host = $host;
@@ -586,12 +586,12 @@ class PluginUploader
 	public function clear_ftp_details($what = 'all')
 	{
 		global $db;
-		
+
 		if($what == 'cookie' || $what == 'all')
 		{
 			my_unsetcookie("mybb_pluginuploader_ftp");
 			my_unsetcookie("mybb_pluginuploader_ftp_test");
-		}	
+		}
 		if($what == 'database' || $what == 'all')
 		{
 			$db->delete_query("pluginuploader", "name = '_ftp'");
@@ -622,7 +622,7 @@ class PluginUploader
 			}
 			return false;
 		}
-		
+
 		// check if the FTP key exists; if not, try and add it automatically
 		if(!$mybb->config['pluginuploader_ftp_key'])
 		{
@@ -656,7 +656,7 @@ class PluginUploader
 						$test_string = $db->fetch_field($query, "ftp_test");
 					}
 				}
-			
+
 				if($test_string)
 				{
 					if($this->decrypt(base64_decode($test_string)) != 'test')
@@ -693,7 +693,7 @@ class PluginUploader
 		{
 			$ftp_connection = @ftp_connect($this->ftp_host);
 		}
-		
+
 		if($ftp_connection)
 		{
 			// we need the second bit of this condition because even though ftp_ssl_connect() is available and returns a valid connection, the login will fail if the server is not configured to understand the SSL encryption
@@ -766,7 +766,7 @@ class PluginUploader
 		global $pluginuploader;
 
 		$to = $this->replace_admin_dir($to);
-		
+
 		if(!$this->use_ftp)
 		{
 			if($this->do_copy_php($from, $to))
@@ -784,7 +784,7 @@ class PluginUploader
 					}
 					@chmod('path', 0755);
 				}
-				
+
 				return $return;
 			}
 		}
@@ -832,7 +832,7 @@ class PluginUploader
 						}
 						@ftp_chmod($this->ftp_connection, $this->get_ftp_chmod(755), $ftp_to_dir);
 					}
-					
+
 					return $return;
 				}
 			}
@@ -840,7 +840,7 @@ class PluginUploader
 
 		return false;
 	}
-	
+
 	public function do_copy_php($from, $to)
 	{
 		if(copy($from, $to))
@@ -850,7 +850,7 @@ class PluginUploader
 				return true;
 			}
 		}
-		
+
 		// copy() has failed, try rename()
 		if(@rename($from, $to))
 		{
@@ -859,7 +859,7 @@ class PluginUploader
 				return true;
 			}
 		}
-		
+
 		// rename() has failed, try fopen()
 		$file = @fopen($to, "w");
 		if($file)
@@ -878,7 +878,7 @@ class PluginUploader
 			}
 		}
 	}
-	
+
 	public function do_copy_ftp($ftp_from, $ftp_to, $from, $to)
 	{
 		if(@ftp_rename($this->ftp_connection, $ftp_from, $ftp_to))
@@ -888,7 +888,7 @@ class PluginUploader
 				return true;
 			}
 		}
-		
+
 		if(@ftp_put($this->ftp_connection, $ftp_to, $from, FTP_BINARY))
 		{
 			if(@file_exists($to))
@@ -896,7 +896,7 @@ class PluginUploader
 				return true;
 			}
 		}
-		
+
 		if(@ftp_fput($this->ftp_connection, $ftp_to, fopen($from, 'r'), FTP_BINARY))
 		{
 			if(@file_exists($to))
@@ -960,7 +960,7 @@ class PluginUploader
 					return true;
 				}
 			}
-			
+
 			if($this->ftp_connect())
 			{
 				$ftp_file = $file;
@@ -1040,7 +1040,7 @@ class PluginUploader
 
 		return false;
 	}
-	
+
 	/**
 	 * Generate an FTP key
 	**/
@@ -1048,21 +1048,21 @@ class PluginUploader
 	{
 		return random_str(32);
 	}
-	
+
 	/**
 	 * Tries to add the FTP key to config.php automatically
 	**/
 	public function add_config_ftp_key()
 	{
 		global $mybb;
-		
+
 		if(!is_writable(MYBB_ROOT.'inc/config.php'))
 		{
 			return false;
 		}
-		
+
 		$ftp_key = $this->generate_config_ftp_key();
-		
+
 		$config_lines = explode("\n", file_get_contents(MYBB_ROOT.'inc/config.php'));
 		foreach($config_lines as $i => &$line)
 		{
@@ -1083,10 +1083,10 @@ class PluginUploader
 			$mybb->config['pluginuploader_ftp_key'] = $ftp_key;
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Replace 'admin' in the file path to compensate for renamed admin folders
 	**/
