@@ -58,20 +58,20 @@ if($mybb->input['action2'] == "do_upload")
 				$plugin_file = $mybb->input['plugin_file'];
 				$plugin_name = $mybb->input['plugin_name'];
 				$plugin_temp_name = $mybb->input['plugin_temp_name'];
-				
+
 				$plugins_cache = $cache->read("plugins");
 				$active_plugins = $plugins_cache['active'];
-				
+
 				$deactivate_function = $plugin_name . "_deactivate";
 				if(function_exists($deactivate_function))
 				{
 					$deactivate_function();
 				}
-				
+
 				unset($active_plugins[$plugin_name]);
 				$plugins_cache['active'] = $active_plugins;
 				$cache->update("plugins", $plugins_cache);
-				
+
 				// need to put this in the URL as we need to reload the page so this plugin won't be loaded meaning we can include the new version of the file
 				// base64 it just so it's a bit neater
 				admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=do_upload&skip_search=1&path=" . base64_encode($path) . "&root=" . base64_encode($root) . "&plugin_file=" . base64_encode($plugin_file) . "&plugin_name=" . base64_encode($plugin_name) . "&plugin_temp_name=" . base64_encode($plugin_temp_name) . "&my_post_key=" . $mybb->post_code);
@@ -96,11 +96,11 @@ if($mybb->input['action2'] == "do_upload")
 			{
 				$query = $db->simple_select("pluginuploader", "version AS salt, files AS password", "name = '_password'");
 				$password = $db->fetch_array($query);
-				
+
 				if($password['password'])
 				{
 					$password_passed = false;
-					
+
 					if($mybb->cookies['mybb_pluginuploader_key'] && $mybb->cookies['mybb_pluginuploader_key'] == $mybb->user['uid']."_".$mybb->user['pluginuploader_key'])
 					{
 						$password_passed = true;
@@ -113,18 +113,18 @@ if($mybb->input['action2'] == "do_upload")
 							{
 								$db->add_column("users", "pluginuploader_key", "VARCHAR(120)");
 							}
-							
+
 							$pluginuploader_key = random_str(32);
 							$update = array(
 								"pluginuploader_key" => $db->escape_string($pluginuploader_key)
 							);
 							$db->update_query("users", $update, "uid = '" . $mybb->user['uid'] . "'");
-							
+
 							my_setcookie("mybb_pluginuploader_key", $mybb->user['uid']."_".$pluginuploader_key);
 						}
 						$password_passed = true;
 					}
-					
+
 					if(!$password_passed)
 					{
 						flash_message($lang->pluginuploader_password_incorrect, 'error');
@@ -137,7 +137,7 @@ if($mybb->input['action2'] == "do_upload")
 					admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=password");
 				}
 			}
-			
+
 			if($mybb->input['from_mods_site'] == 1)
 			{
 				$plugin_temp_name = $mybb->input['plugin_name'];
@@ -155,11 +155,11 @@ if($mybb->input['action2'] == "do_upload")
 				{
 					my_setcookie('mybb_pluginuploader_send_usage_stats', 'no');
 				}*/
-				
+
 				if(!empty($mybb->input['plugin_url']))
 				{
 					update_admin_session('pluginuploader_import_source', 'url');
-					
+
 					// check if it's a Mods Site URL
 					$is_mods_site = preg_match('#community\.mybb\.com/mods\.php\?action=(view|download)&pid=([0-9]+)#', $mybb->input['plugin_url'], $plugin_url_info);
 					if($is_mods_site)
@@ -183,7 +183,7 @@ if($mybb->input['action2'] == "do_upload")
 						{
 							$is_mybb_forum = true;
 						}
-						
+
 						if($is_mybb_forum && $mybb->input['has_site_login'])
 						{
 							if(empty($mybb->input['site_login_username']) || empty($mybb->input['site_login_password']))
@@ -191,7 +191,7 @@ if($mybb->input['action2'] == "do_upload")
 								flash_message($lang->pluginuploader_from_url_site_login, 'error');
 								admin_redirect("index.php?module=config-plugins&action=pluginuploader&get_site_login=1&plugin_url=".base64_encode($mybb->input['plugin_url']));
 							}
-							
+
 							$fields = array(
 								'username' => urlencode($mybb->input['site_login_username']),
 								'password' => urlencode($mybb->input['site_login_password']),
@@ -218,7 +218,7 @@ if($mybb->input['action2'] == "do_upload")
 								admin_redirect("index.php?module=config-plugins&action=pluginuploader&get_site_login=1&plugin_url=".base64_encode($mybb->input['plugin_url']));
 							}
 						}
-						
+
 						global $request_headers;
 						$request_headers = '';
 						$ch = curl_init();
@@ -235,12 +235,12 @@ if($mybb->input['action2'] == "do_upload")
 						$info = curl_getinfo($ch);
 						curl_close($ch);
 						$result = str_replace($request_headers, '', $result);
-						
+
 						//echo '<pre>';print_r($request_headers);echo '</pre>';
 						//echo '<pre>';print_r(explode("\n", htmlspecialchars($result)));echo '</pre>';
 						//echo '<pre>';print_r($info);echo '</pre>';
 						//exit;
-						
+
 						if($info['http_code'] == 200 && in_array($info['content_type'], array('application/force-download', 'application/zip')) && !empty($result))
 						{
 							$file_type = 'zip';
@@ -276,7 +276,7 @@ if($mybb->input['action2'] == "do_upload")
 								{
 									$get_site_login = '&get_site_login=1';
 								}
-								
+
 								flash_message($lang->pluginuploader_from_url_login_required, 'error');
 								admin_redirect("index.php?module=config-plugins&action=pluginuploader".$get_site_login."&plugin_url=".base64_encode($mybb->input['plugin_url']));
 							}
@@ -297,7 +297,7 @@ if($mybb->input['action2'] == "do_upload")
 					$file_path = $_FILES['plugin_file']['tmp_name'];
 				}
 			}
-			
+
 			switch($pathinfo['extension'])
 			{
 				case "zip":
@@ -306,30 +306,30 @@ if($mybb->input['action2'] == "do_upload")
 						flash_message($lang->pluginuploader_error_no_ziparchive_class, 'error');
 						admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 					}
-					
+
 					$zip = new ZipArchive;
-					
+
 					// try to open the zip
 					if(!@$zip->open($file_path))
 					{
 						flash_message($lang->pluginuploader_error_upload, 'error');
 						admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 					}
-					
+
 					// try to create a temporary directory for the files
 					if(!pluginuploader_create_temp_dir($plugin_temp_name))
 					{
 						flash_message($lang->pluginuploader_error_temp_dir, 'error');
 						admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 					}
-					
+
 					// try to extract the files to the temp directory
 					if(!@$zip->extractTo($path))
 					{
 						flash_message($lang->pluginuploader_error_extract, 'error');
 						admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 					}
-					
+
 					$zip->close();
 					break;
 				case "php":
@@ -339,7 +339,7 @@ if($mybb->input['action2'] == "do_upload")
 						flash_message($lang->pluginuploader_error_temp_dir, 'error');
 						admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 					}
-					
+
 					if(!empty($mybb->input['plugin_url']))
 					{
 						if(!@copy($file_path, $path.'/'.$plugin_temp_name.'.php'))
@@ -361,30 +361,30 @@ if($mybb->input['action2'] == "do_upload")
 					flash_message($lang->pluginuploader_invalid_type, 'error');
 					admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 			}
-			
+
 			// find the file root for the actual plugin files
 			$root = pluginuploader_find_root($path);
 			//echo $root . "<br />";
-			
+
 			// if it couldn't work out where the plugin files were, show an error saying it can't import the plugin
 			if($root == -1)
 			{
 				flash_message($lang->pluginuploader_error_path, 'error');
 				admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 			}
-			
+
 			$plugin_file = pluginuploader_find_pluginfile($root);
 			if(!$plugin_file)
 			{
 				flash_message($lang->pluginuploader_error_plugin_file, 'error');
 				admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 			}
-			
+
 			$plugin_name = str_replace(array("inc/plugins/", ".php"), "", $plugin_file);
 			if($plugin_name == "pluginuploader")
 			{
 				pluginuploader_move_files($root, 'upgrade');
-				
+
 				flash_message($lang->pluginuploader_upgraded, 'success');
 				admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 			}
@@ -394,32 +394,32 @@ if($mybb->input['action2'] == "do_upload")
 			if(in_array($plugin_name, $plugins_cache['active']))
 			{
 				$page->output_header($lang->pluginuploader);
-				
+
 				$form = new Form("index.php?module=config-plugins&action=pluginuploader&amp;action2=do_upload&do_deactivate=1", "post");
 				$form_container = new FormContainer($lang->pluginuploader_upload_plugin);
-				
+
 				$form_container->output_row("", "", $lang->pluginuploader_deactivate_desc);
 				$form_container->output_row($lang->pluginuploader_deactivate, "", $form->generate_yes_no_radio("deactivate", 1, true, array("checked" => 1)));
 				$form_container->end();
-				
+
 				echo $form->generate_hidden_field("path", $path);
 				echo $form->generate_hidden_field("root", $root);
 				echo $form->generate_hidden_field("plugin_file", $plugin_file);
 				echo $form->generate_hidden_field("plugin_name", $plugin_name);
 				echo $form->generate_hidden_field("plugin_temp_name", $plugin_temp_name);
-				
+
 				$buttons[] = $form->generate_submit_button($lang->submit, array("id" => "submit"));
 				$form->output_submit_wrapper($buttons);
 				$form->end();
-				
+
 				$page->output_footer();
 				exit;
 			}
 		}
-		
+
 		//echo $plugin_file . "<br />";
 		//echo $plugin_name . "<br />";
-		
+
 		// the reason we need to do this is because we're going to be including the plugin file, which will run the default code to add hooks
 		// if one of those hooks is run during the execution of the following code in _this_ plugin (e.g. something in the form/table generation), it's going to try and run the plugin we're including, which may break things, or give errors if language files don't exist etc
 		// instead, we re-create the plugins class with a modified version of the add_hook() method, so when we include this plugin file and it runs $plugins->add_hook(), it'll do nothing
@@ -430,11 +430,11 @@ if($mybb->input['action2'] == "do_upload")
 		{
 			function add_hook($hook, $function, $priority = 10, $file = '')
 			{
-				
+
 			}
 		}
 		$plugins = new MyPluginSystem;
-		
+
 		// reluctantly, this has to go before the plugin file is included, in case the plugin file loads a language file in the file directly, and not in a function
 		/*if(is_dir($root . "/inc/languages/english/"))
 		{
@@ -447,7 +447,7 @@ if($mybb->input['action2'] == "do_upload")
 					@$pluginuploader->copy($root . "/inc/languages/english/" . $lang_file, MYBB_ROOT . "inc/languages/english/" . $lang_file);
 				}
 			}
-			
+
 			if(is_dir($root . "/inc/languages/english/admin/"))
 			{
 				chdir($root . "/inc/languages/english/admin/");
@@ -461,7 +461,7 @@ if($mybb->input['action2'] == "do_upload")
 				}
 			}
 		}*/
-		
+
 		//var_dump(pluginuploader_has_external_files($root));
 		// OK, we have the info function, we're definitely looking at the right file
 		// check if this plugin adds it's own folder to the ./inc/plugins/ folder
@@ -471,7 +471,7 @@ if($mybb->input['action2'] == "do_upload")
 			//echo "<pre>";print_r($root);echo "</pre>";
 			$external_files = pluginuploader_load_external_files($root . "/inc", $root);
 			//echo "<pre>";print_r($external_files);echo "</pre>";
-			
+
 			if(!empty($external_files))
 			{
 				$errors = array();
@@ -503,26 +503,26 @@ if($mybb->input['action2'] == "do_upload")
 				}
 			}
 		}
-		
+
 		//echo "<pre>";print_r($root . "/" . $plugin_file);echo "</pre>";
 		if(file_exists($root . "/" . $plugin_file))
 		{
 			require_once $root . "/" . $plugin_file;
 		}
-		
+
 		$info_func = $plugin_name . "_info";
 		if(!function_exists($info_func))
 		{
 			flash_message($lang->pluginuploader_error_plugin_file, 'error');
 			admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 		}
-		
+
 		//echo "<pre>";print_r($external_files);echo "</pre>";exit;
 		$info = $info_func();
 		//echo "<pre>";print_r($info);echo "</pre>";
-		
+
 		$compatible = plugin_is_compatible($plugin_name, $root . "/" . $plugin_file);
-		
+
 		// only delete these files if the plugin didn't already exist; just in case they abort, it may stop fatal errors due to missing files
 		if(!file_exists(MYBB_ROOT.'inc/plugins/'.$plugin_name.'.php'))
 		{
@@ -543,7 +543,7 @@ if($mybb->input['action2'] == "do_upload")
 					}
 				}
 			}
-			
+
 			/*if(!empty($lang_files))
 			{
 				foreach($lang_files as $lang_files)
@@ -565,28 +565,28 @@ if($mybb->input['action2'] == "do_upload")
 				}
 			}*/
 		}
-		
+
 		// we have to redirect if it isn't compatible after we've removed all the other files we moved before
 		if(!$compatible)
 		{
 			flash_message($lang->sprintf($lang->plugin_incompatible, $mybb->version_code), 'error');
 			admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 		}
-		
+
 		// plugin is from the MyBB Mods site, check the version
 		if(array_key_exists("codename", $info))
 		{
 			$mods_site_version = array();
 			$url = "https://community.mybb.com/version_check.php?info[]=" . urlencode($info['codename']);
-			
+
 			$contents = @fetch_remote_file($url);
-			
+
 			if($contents)
 			{
 				require_once MYBB_ROOT."inc/class_xml.php";
 				$parser = new XMLParser($contents);
 				$tree = $parser->get_tree();
-				
+
 				if($tree)
 				{
 					if($tree['plugins']['plugin']['version']['value'])
@@ -602,20 +602,20 @@ if($mybb->input['action2'] == "do_upload")
 				}
 			}
 		}
-		
+
 		$new_version = null;
 		if(!empty($mods_site_version))
 		{
 			preg_match('/([0-9]+)$/', $mods_site_version['download'], $plugin_id);
 
 			$table = new Table;
-			
+
 			$table->construct_cell($lang->sprintf($lang->pluginuploader_new_version_warning, $info['name'], $info['version'], $mods_site_version['version'], $plugin_id[1], $mods_site_version['download'], $mybb->post_code));
 			$table->construct_row();
-			
+
 			$new_version = $table->output("", 1, "general", true);
 		}
-		
+
 		$has_non_php_root_files = false;
 		$php = $pluginuploader->glob($root . "/*.php");
 		$dirs = array_filter($pluginuploader->glob($root . "/*"), "is_dir");
@@ -625,7 +625,7 @@ if($mybb->input['action2'] == "do_upload")
 		{
 			$has_non_php_root_files = true;
 		}
-		
+
 		$screenshots = pluginuploader_load_screenshots($path);
 		if(!empty($screenshots))
 		{
@@ -634,18 +634,18 @@ if($mybb->input['action2'] == "do_upload")
 				$screenshot = str_replace(MYBB_ROOT, "", $screenshot);
 			}
 		}
-		
+
 		$readme = pluginuploader_load_readme($path);
 
 		$author = '<a href="'.$info['authorsite'].'" target="_blank">'.$info['author'].'</a>';
 		$website = '<a href="'.$info['website'].'" target="_blank">'.$info['website'].'</a>';
-		
+
 		$page->add_breadcrumb_item($lang->pluginuploader_plugin_info);
 		$page->output_header($lang->pluginuploader);
-		
+
 		$form = new Form("index.php?module=config-plugins&action=pluginuploader&amp;action2=do_upload&amp;do=import", "post", "", 1, "", "", "submit = document.getElementById('submit'); submit.style.color = '#CCCCCC'; submit.style.border = '1px solid #CCCCCC'; submit.disabled = 'disabled';");
 		$form_container = new FormContainer($lang->pluginuploader_upload_plugin.' - '.$info['name']);
-		
+
 		// does this file already exist?
 		if(file_exists(MYBB_ROOT . "inc/plugins/" . $plugin_name . ".php"))
 		{
@@ -678,14 +678,14 @@ if($mybb->input['action2'] == "do_upload")
 					}
 				}
 			}
-			
+
 			if(!empty($new_version))
 			{
 				echo $new_version;
 			}
-			
+
 			$plugin_exists_message .= " " . $lang->pluginuploader_plugin_upgrade_warning;
-			
+
 			$form_container->output_row("", "", $plugin_exists_message);
 			$form_container->output_row($lang->pluginuploader_plugin_name, "", $info['name']);
 			$form_container->output_row($lang->pluginuploader_plugin_description, "", $info['description']);
@@ -711,12 +711,12 @@ if($mybb->input['action2'] == "do_upload")
 		{
 			// this is a new plugin, ask if they want to activate/install
 			$type = "new";
-			
+
 			if(!empty($new_version))
 			{
 				echo $new_version;
 			}
-			
+
 			$form_container->output_row($lang->pluginuploader_plugin_name, "", $info['name']);
 			$form_container->output_row($lang->pluginuploader_plugin_description, "", $info['description']);
 			$form_container->output_row($lang->pluginuploader_plugin_version, "", $info['version']);
@@ -737,18 +737,18 @@ if($mybb->input['action2'] == "do_upload")
 			$form_container->output_row($lang->pluginuploader_install_activate, $lang->pluginuploader_install_activate_desc, $form->generate_yes_no_radio("activate", 1, true));
 			$form_container->end();
 		}
-		
+
 		echo $form->generate_hidden_field("root", $root);
 		echo $form->generate_hidden_field("plugin_file", $plugin_file);
 		echo $form->generate_hidden_field("plugin_name", $plugin_name);
 		echo $form->generate_hidden_field("plugin_temp_name", $plugin_temp_name);
 		echo $form->generate_hidden_field("plugin_version", $info['version']);
 		echo $form->generate_hidden_field("type", $type);
-		
+
 		$buttons[] = $form->generate_submit_button($lang->pluginuploader_import_plugin, array("id" => "submit"));
 		$form->output_submit_wrapper($buttons);
 		$form->end();
-		
+
 		$page->output_footer();
 	}
 	// we can either slip right into this if it's a new plugin, or come here after a confirmation if this is a pre-existing plugin
@@ -759,14 +759,14 @@ if($mybb->input['action2'] == "do_upload")
 			flash_message($lang->invalid_post_verify_key2, 'error');
 			admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 		}
-		
+
 		$plugin_name = $mybb->input['plugin_name'];
 		$plugin_temp_name = $mybb->input['plugin_temp_name'];
 		$import_non_php_root_files = $mybb->input['import_non_php_root_files'];
-		
+
 		$root = $mybb->input['root'];
 		$type = $mybb->input['type'];
-		
+
 		$current_files = array();
 		$query = $db->simple_select("pluginuploader", "files", "name = '" . $db->escape_string($plugin_name) . "'");
 		if($db->num_rows($query) == 1)
@@ -786,19 +786,19 @@ if($mybb->input['action2'] == "do_upload")
 		$files = pluginuploader_move_files($root, $type, $current_files, $import_non_php_root_files);
 		//echo "<pre>";print_r($files);echo "</pre>";
 		//exit;
-		
+
 		$files['files'] = serialize($files['files']);
-		
+
 		$replace = array(
 			"name" => $db->escape_string($plugin_name),
 			"version" => $db->escape_string($mybb->input['plugin_version']),
 			"files" => $db->escape_string($files['files'])
 		);
 		$db->replace_query("pluginuploader", $replace);
-		
+
 		@$pluginuploader->rmdir(MYBB_ROOT . "inc/plugins/temp/" . $plugin_temp_name);
 		@$pluginuploader->unlink(MYBB_ROOT . "inc/plugins/temp/" . $plugin_temp_name.'.zip');
-		
+
 		if(!empty($files['errors']))
 		{
 			$errors = "<li>" . str_replace("MYBB_ADMIN_DIR", $mybb->config['admin_dir'], implode("</li><li>", $files['errors'])) . "</li>";
@@ -850,10 +850,10 @@ elseif($mybb->input['action2'] == "do_install")
 		flash_message($lang->invalid_post_verify_key2, 'error');
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 	}
-	
+
 	$plugin_id = $mybb->input['plugin_id'];
 	$plugin_name = $mybb->input['plugin_name'];
-	
+
 	$url = 'https://community.mybb.com/mods.php';
 	$fields = array(
 		'action' => 'download',
@@ -862,13 +862,13 @@ elseif($mybb->input['action2'] == "do_install")
 		'bid' => $mybb->input['bid'],
 		'agree' => '1'
 	);
-	
+
 	foreach($fields as $key=>$value)
 	{
 		$fields_string .= $key.'='.$value.'&';
 	}
 	rtrim($fields_string, '&');
-	
+
 	$result = '';
 	if(pluginuploader_can_use_mods_site())
 	{
@@ -879,13 +879,13 @@ elseif($mybb->input['action2'] == "do_install")
 		curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
 		$result = curl_exec($ch);
 	}
-	
+
 	if(!empty($result) && @file_put_contents(MYBB_ROOT.'inc/plugins/temp/'.$plugin_id.'.zip', $result))
 	{
 		if(md5_file(MYBB_ROOT.'inc/plugins/temp/'.$plugin_id.'.zip') == $mybb->input['md5'])
 		{
 			update_admin_session('pluginuploader_import_source', 'modssite');
-		
+
 			flash_message($lang->pluginuploader_downloaded_from_mods, 'success');
 			admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=do_upload&from_mods_site=1&plugin_name=".$plugin_id."&my_post_key={$mybb->post_code}");
 		}
@@ -904,7 +904,7 @@ elseif($mybb->input['action2'] == "do_install")
 elseif($mybb->input['action2'] == "install")
 {
 	$plugin = $mybb->input['plugin'];
-	
+
 	if(!pluginuploader_can_use_mods_site())
 	{
 		flash_message($lang->sprintf($lang->pluginuploader_error_downloading_from_mods, $plugin).'<br /><br />'.$error_message, 'error');
@@ -913,6 +913,7 @@ elseif($mybb->input['action2'] == "install")
 
 	$view_contents = file_get_contents('https://community.mybb.com/mods.php?action=view&pid='.$plugin);
 	$download_contents = file_get_contents('https://community.mybb.com/mods.php?action=download&pid='.$plugin);
+	$licence_contents = file_get_contents('https://community.mybb.com/mods.php?action=license&pid='.$plugin);
 	if(strpos($download_contents, 'You have selected an invalid project.') !== false)
 	{
 		flash_message($lang->sprintf($lang->pluginuploader_download_from_mods_invalid, $plugin), 'error');
@@ -921,20 +922,23 @@ elseif($mybb->input['action2'] == "install")
 
 	$view = new DOMDocument();
 	$download = new DOMDocument();
+	$licence = new DOMDocument();
 	@$view->loadHTML($view_contents);
 	@$download->loadHTML($download_contents);
+	@$licence->loadHTML($licence_contents);
 
-	preg_match('/MyBB Mods - (.*)/', $view->textContent, $plugin_name);
+	preg_match('/<h2 class="extend-project__title">(.*)<\/h2>/', $view_contents, $plugin_name);
 	$plugin_name = $plugin_name[1];
 
-	preg_match('/License(.*)Latest Builds/s', $download->textContent, $licence);
-	$licence = trim($licence[1]);
-	list($licence_name,$licence_content) = explode("\n", $licence, 2);
-	$licence_name = trim($licence_name);
-	$licence_content = trim(preg_replace('/\n[\s]+/', '', $licence_content));
+	preg_match('/<h3 class="extend-project__section__title">License for '.$plugin_name.' - (.*)<\/h3>/', $licence_contents, $licence_name);
+	$licence_name = $licence_name[1];
+	preg_match('/<div class="extend-project__section__block extend-project__license__text">(.*)<\/div>/sU', $licence_contents, $licence_content);
+	$licence_content = $licence_content[1];
 
-	preg_match('/<div class="mods-primer-description">(.*)<\/div>/sU', $download_contents, $description_div);
-	preg_match('/<p>(.*)<\/p>/', $description_div[1], $description);
+	//$licence_name = trim($licence_name);
+	//$licence_content = trim(preg_replace('/\n[\s]+/', '', $licence_content));
+
+	preg_match('/<p class="extend-project__description">(.*)<\/p>/', $view_contents, $description);
 	$description = $description[1];
 
 	preg_match('/Version: ([0-9\.]+)/', $view->textContent, $version);
@@ -943,23 +947,38 @@ elseif($mybb->input['action2'] == "install")
 	preg_match('/<a href="https:\/\/community.mybb.com\/user-([0-9]+).html">(.*)<\/a>/U', $view_contents, $author);
 	$author = '<a href="https://community.mybb.com/user-'.$author[1].'.html" target="_blank">'.$author[2].'</a>';
 
-	preg_match('/File Size: ([0-9\.]+\s[K|M]B)/', $download->textContent, $size);
+	preg_match('/<span class="extend-project__meta__data extend-project__meta__data--downloads icon fa-arrow-down">([0-9]+) Downloads?<\/span>/', $view_contents, $downloads);
+	$downloads = $downloads[1];
+	preg_match('/<span class="extend-project__meta__data extend-project__meta__data--stars icon fa-star">([0-9]+) Stars?<\/span>/', $view_contents, $stars);
+	$stars = $stars[1];
+
+	preg_match('/<dd class="extend-download__details__data">([0-9\.]+\s[K|M]B)<\/dd>/', $download_contents, $size);
 	$size = $size[1];
 
-	$date_regex = '([0-9]{2})-([0-9]{2})-([0-9]{4}), ([0-9]{2}):([0-9]{2}) ([A|P]M)';
-	preg_match('/<strong>Submitted:<\/strong> '.$date_regex.'<br \/>/', $view_contents, $date_submitted);
-	$date_submitted = my_date('jS F Y, H:i', mktime(($date_submitted[6]=='PM'?$date_submitted[4]+12:$date_submitted[4]), $date_submitted[5], 0, $date_submitted[1], $date_submitted[2], $date_submitted[3]));
-	preg_match('/<strong>Date Uploaded:<\/strong> '.$date_regex.'<br \/>/', $download_contents, $date_build);
-	$date_build = my_date('jS F Y, H:i', mktime(($date_build[6]=='PM'?$date_build[4]+12:$date_build[4]), $date_build[5], 0, $date_build[1], $date_build[2], $date_build[3]));
-	preg_match('/<strong>Last Updated:<\/strong> '.$date_regex.'<br \/>/', $view_contents, $date_updated);
-	$date_updated = my_date('jS F Y, H:i', mktime(($date_updated[6]=='PM'?$date_updated[4]+12:$date_updated[4]), $date_updated[5], 0, $date_updated[1], $date_updated[2], $date_updated[3]));
+	preg_match('/extend-download__download__description__reviewed extend-download__download__description__reviewed--reviewed icon fa-check-circle/', $download_contents, $review_status);
+	if($review_status)
+	{
+		$review_status = $lang->pluginuploader_plugin_reviewed;
+	}
+	else
+	{
+		$review_status = $lang->pluginuploader_plugin_not_reviewed;
+	}
+	$review_status .= ' '.$lang->pluginuploader_plugin_review_more_info;
 
-	preg_match_all('/<a id="previews" rel="previews" href="(.*)" target="_blank"><img src="(.*)" \/><\/a>/', $view_contents, $screenshots);
+	$date_regex = '([0-9]{2})-([0-9]{2})-([0-9]{4}), ([0-9]{2}):([0-9]{2}) ([A|P]M)';
+	preg_match_all('/<dd class="extend-project__details__data">'.$date_regex.'<\/dd>/', $view_contents, $date_submitted_updated);
+	preg_match('/<dd class="extend-download__details__data">'.$date_regex.'<\/dd>/', $download_contents, $date_build);
+	$date_submitted = my_date('jS F Y, H:i', mktime(($date_submitted_updated[6][0]=='PM'?$date_submitted_updated[4][0]+12:$date_submitted_updated[4][0]), $date_submitted_updated[5][0], 0, $date_submitted_updated[1][0], $date_submitted_updated[2][0], $date_submitted_updated[3][0]));
+	$date_updated = my_date('jS F Y, H:i', mktime(($date_submitted_updated[6][1]=='PM'?$date_submitted_updated[4][1]+12:$date_submitted_updated[4][1]), $date_submitted_updated[5][1], 0, $date_submitted_updated[1][1], $date_submitted_updated[2][1], $date_submitted_updated[3][1]));
+	$date_build = my_date('jS F Y, H:i', mktime(($date_build[6]=='PM'?$date_build[4]+12:$date_build[4]), $date_build[5], 0, $date_build[1], $date_build[2], $date_build[3]));
+
+	preg_match_all('/<a rel="previews" href="(.*)" class="fancybox extend-project__previews__preview__link"><img src="(.*)" \/><\/a>/', $view_contents, $screenshots);
 	$screenshots = $screenshots[1];
 
 	// todo - downloads, verified developer, recommendations
 
-	preg_match('/MD5: ([a-zA-Z0-9]{32})/', $download->textContent, $md5);
+	preg_match('/<dd class="extend-download__details__data">([a-zA-Z0-9]{32})<\/dd>/', $download_contents, $md5);
 	$md5 = $md5[1];
 
 	preg_match('/<input type="hidden" value="([a-zA-Z0-9]{32})" name="my_post_key">/', $download_contents, $mods_site_post_key);
@@ -975,11 +994,11 @@ elseif($mybb->input['action2'] == "install")
 		flash_message($lang->pluginuploader_ftp_required_desc.$lang->sprintf($lang->pluginuploader_error_downloading_from_mods_ftp_desc, $plugin_name), 'error');
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=ftp_details");
 	}
-	
+
 	$page->output_header($lang->pluginuploader);
-	
+
 	$lang->load("config_plugins");
-	
+
 	$sub_tabs['plugins'] = array(
 		'title' => $lang->plugins,
 		'link' => "index.php?module=config-plugins",
@@ -990,15 +1009,15 @@ elseif($mybb->input['action2'] == "install")
 		'link' => "index.php?module=config-plugins&amp;action=check",
 		'description' => $lang->plugin_updates_desc
 	);
-	
+
 	$sub_tabs['browse_plugins'] = array(
 		'title' => $lang->browse_plugins,
 		'link' => "index.php?module=config-plugins&amp;action=browse",
 		'description' => $lang->browse_plugins_desc
 	);
-	
+
 	$plugins->run_hooks("admin_config_plugins_tabs", $sub_tabs);
-	
+
 	$page->output_nav_tabs($sub_tabs, 'upload_plugin');
 
 	$form_container = new FormContainer($lang->pluginuploader_import_plugin.' - '.$plugin_name);
@@ -1006,7 +1025,10 @@ elseif($mybb->input['action2'] == "install")
 	$form_container->output_row($lang->pluginuploader_plugin_description, "", $description);
 	$form_container->output_row($lang->pluginuploader_plugin_version, "", $version);
 	$form_container->output_row($lang->pluginuploader_plugin_author, "", $author);
+	$form_container->output_row($lang->pluginuploader_plugin_downloads, "", $downloads);
+	$form_container->output_row($lang->pluginuploader_plugin_stars, "", $stars.' '.str_repeat('<img src="../images/star.gif">', $stars));
 	$form_container->output_row($lang->pluginuploader_plugin_size, "", $size);
+	$form_container->output_row($lang->pluginuploader_plugin_review_status, "", $review_status);
 	$form_container->output_row($lang->pluginuploader_plugin_date_submitted, "", $date_submitted);
 	$form_container->output_row($lang->pluginuploader_plugin_date_build, "", $date_build);
 	$form_container->output_row($lang->pluginuploader_plugin_date_updated, "", $date_updated);
@@ -1015,24 +1037,24 @@ elseif($mybb->input['action2'] == "install")
 		pluginuploader_show_screenshots($screenshots, $form_container, true);
 	}
 	$form_container->end();
-	
+
 	$form = new Form("index.php?module=config-plugins&action=pluginuploader&amp;action2=do_install", "post", "", 1, "", "", "submit = document.getElementById('submit'); submit.style.color = '#CCCCCC'; submit.style.border = '1px solid #CCCCCC'; submit.disabled = 'disabled';");
 	$form_container = new FormContainer($lang->sprintf($lang->pluginuploader_licence, $plugin_name));
-	
+
 	$form_container->output_row($lang->pluginuploader_licence_desc, '', $licence_name.'<br /><br />'.nl2br($licence_content));
-	
+
 	echo $form->generate_hidden_field("plugin_id", $plugin);
 	echo $form->generate_hidden_field("plugin_name", $plugin_name);
 	echo $form->generate_hidden_field("md5", $md5);
 	echo $form->generate_hidden_field("bid", $bid);
 	echo $form->generate_hidden_field("mods_site_post_key", $mods_site_post_key);
-	
+
 	$form_container->end();
-	
+
 	$buttons[] = $form->generate_submit_button($lang->pluginuploader_agree_and_download, array("id" => "submit"));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
-	
+
 	$page->output_footer();
 }
 elseif($mybb->input['action2'] == "ftp_details")
@@ -1042,7 +1064,7 @@ elseif($mybb->input['action2'] == "ftp_details")
 		flash_message($lang->pluginuploader_ftp_message_missing_config_flash, 'error');
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 	}
-	
+
 	// doing this in here rather than in a separate condition block like with passwords above as I want to pass the POST values back to the form to pre-fill the values
 	if($mybb->request_method == 'post')
 	{
@@ -1051,7 +1073,7 @@ elseif($mybb->input['action2'] == "ftp_details")
 			flash_message($lang->invalid_post_verify_key2, 'error');
 			admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 		}
-		
+
 		$has_error = false;
 		if(!strlen(trim($mybb->input['ftp_host'])))
 		{
@@ -1078,7 +1100,7 @@ elseif($mybb->input['action2'] == "ftp_details")
 			flash_message($lang->pluginuploader_ftp_cookie_expiry_missing, 'error');
 			$has_error = true;
 		}
-		
+
 		if(!$has_error)
 		{
 			$pluginuploader->changing_details = true;
@@ -1096,9 +1118,9 @@ elseif($mybb->input['action2'] == "ftp_details")
 				);
 				$ftp_details = base64_encode(serialize($ftp_details));
 				$ftp_details_test = base64_encode($pluginuploader->encrypt('test'));
-				
+
 				$pluginuploader->clear_ftp_details();
-				
+
 				if($mybb->input['ftp_storage_location'] == 'cookie')
 				{
 					switch($mybb->input['ftp_cookie_expiry'])
@@ -1120,7 +1142,7 @@ elseif($mybb->input['action2'] == "ftp_details")
 							$expiry = null;
 							break;
 					}
-					
+
 					my_setcookie("mybb_pluginuploader_ftp", $ftp_details, $expiry, true);
 					my_setcookie("mybb_pluginuploader_ftp_test", $ftp_details_test, $expiry, true);
 				}
@@ -1132,7 +1154,7 @@ elseif($mybb->input['action2'] == "ftp_details")
 						"files" => $db->escape_string($ftp_details)
 					);
 					$db->replace_query("pluginuploader", $replace);
-					
+
 					$replace = array(
 						"name" => "_ftp_test",
 						"version" => '',
@@ -1140,7 +1162,7 @@ elseif($mybb->input['action2'] == "ftp_details")
 					);
 					$db->replace_query("pluginuploader", $replace);
 				}
-				
+
 				$mods_site_plugin = $admin_session['data']['pluginuploader_mods_site_plugin'];
 				if(!empty($mods_site_plugin))
 				{
@@ -1152,23 +1174,23 @@ elseif($mybb->input['action2'] == "ftp_details")
 				{
 					$url = "index.php?module=config-plugins&action=pluginuploader";
 				}
-				
+
 				flash_message($lang->pluginuploader_ftp_details_added, 'success');
 				admin_redirect($url);
 			}
 		}
 	}
-	
+
 	$page->add_breadcrumb_item($lang->pluginuploader_ftp_details);
 	$page->output_header($lang->pluginuploader);
-	
+
 	$lang->load("config_plugins");
-	
+
 	$form = new Form("index.php?module=config-plugins&amp;action=pluginuploader&amp;action2=ftp_details", "post");
 	$form_container = new FormContainer($lang->pluginuploader_ftp_details);
-	
+
 	echo '<script src="jscripts/pluginuploader.js?version='.PLUGINUPLOADER_VERSION.'"></script>';
-	
+
 	$storage_location_options = array(
 		'' => '',
 		'cookie' => $lang->pluginuploader_ftp_storage_location_cookie,
@@ -1182,18 +1204,18 @@ elseif($mybb->input['action2'] == "ftp_details")
 		'month' => $lang->pluginuploader_ftp_cookie_expiry_month,
 		'forever' => $lang->pluginuploader_ftp_cookie_expiry_forever
 	);
-	
+
 	$form_container->output_row($lang->pluginuploader_ftp_host . " <em>*</em>", $lang->pluginuploader_ftp_host_desc, $form->generate_text_box("ftp_host", $mybb->input['ftp_host'], array('id' => 'ftp_host')));
 	$form_container->output_row($lang->pluginuploader_ftp_user . " <em>*</em>", $lang->pluginuploader_ftp_user_desc, $form->generate_text_box("ftp_user", $mybb->input['ftp_user'], array('id' => 'ftp_user')));
 	$form_container->output_row($lang->pluginuploader_ftp_password . " <em>*</em>", $lang->pluginuploader_ftp_password_desc, $form->generate_password_box("ftp_password", $mybb->input['ftp_password']));
 	$form_container->output_row($lang->pluginuploader_ftp_storage_location . " <em>*</em>", $lang->pluginuploader_ftp_storage_location_desc, $form->generate_select_box("ftp_storage_location", $storage_location_options, $mybb->input['ftp_storage_location'], array('id' => 'ftp_storage_location')));
 	$form_container->output_row($lang->pluginuploader_ftp_cookie_expiry . " <em>*</em>", $lang->pluginuploader_ftp_cookie_expiry_desc, $form->generate_select_box("ftp_cookie_expiry", $cookie_expiry_options, $mybb->input['ftp_cookie_expiry'], array('id' => 'ftp_cookie_expiry')));
 	$form_container->end();
-	
+
 	$buttons[] = $form->generate_submit_button($lang->pluginuploader_ftp_test_connection_save, array("id" => "submit"));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
-	
+
 	$page->output_footer();
 }
 elseif($mybb->input['action2'] == "clear_ftp_details")
@@ -1203,9 +1225,9 @@ elseif($mybb->input['action2'] == "clear_ftp_details")
 		flash_message($lang->invalid_post_verify_key2, 'error');
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 	}
-	
+
 	$pluginuploader->clear_ftp_details();
-	
+
 	flash_message($lang->pluginuploader_ftp_details_cleared, 'success');
 	admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 }
@@ -1228,16 +1250,16 @@ elseif($mybb->input['action2'] == "do_password")
 		flash_message($lang->pluginuploader_password_not_super_admin, 'error');
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 	}
-	
+
 	if(!verify_post_check($mybb->input['my_post_key']))
 	{
 		flash_message($lang->invalid_post_verify_key2, 'error');
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 	}
-	
+
 	$query = $db->simple_select("pluginuploader", "version AS salt, files AS password", "name = '_password'");
 	$password = $db->fetch_array($query);
-	
+
 	// we only need to validate the current password if one's already been set
 	if($password['password'])
 	{
@@ -1247,36 +1269,36 @@ elseif($mybb->input['action2'] == "do_password")
 			admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=password");
 		}
 	}
-	
+
 	if(!strlen(trim($mybb->input['password1'])) || !strlen(trim($mybb->input['password2'])))
 	{
 		flash_message($lang->pluginuploader_password_empty, 'error');
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=password");
 	}
-	
+
 	if($mybb->input['password1'] != $mybb->input['password2'])
 	{
 		flash_message($lang->pluginuploader_password_not_same, 'error');
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader&action2=password");
 	}
-	
+
 	$salt = random_str(10);
 	$stored_pass = md5(md5($mybb->input['password1']) . md5($salt));
-	
+
 	$replace = array(
 		"name" => "_password",
 		"version" => $db->escape_string($salt),
 		"files" => $db->escape_string($stored_pass)
 	);
 	$db->replace_query("pluginuploader", $replace);
-	
+
 	$update = array(
 		"pluginuploader_key" => ''
 	);
 	$db->update_query("users", $update);
-	
+
 	my_unsetcookie("mybb_pluginuploader_key");
-	
+
 	flash_message($lang->pluginuploader_password_updated, 'success');
 	admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 }
@@ -1287,18 +1309,18 @@ elseif($mybb->input['action2'] == "password")
 		flash_message($lang->pluginuploader_password_not_super_admin, 'error');
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 	}
-	
+
 	$page->add_breadcrumb_item($lang->pluginuploader_password_change_title);
 	$page->output_header($lang->pluginuploader);
-	
+
 	$lang->load("config_plugins");
-	
+
 	$query = $db->simple_select("pluginuploader", "version AS salt, files AS password", "name = '_password'");
 	$password = $db->fetch_array($query);
-	
+
 	$form = new Form("index.php?module=config-plugins&amp;action=pluginuploader&amp;action2=do_password", "post");
 	$form_container = new FormContainer($lang->pluginuploader_password_change_title);
-	
+
 	$form_container->output_row("", "", $lang->pluginuploader_install_password_message);
 	if($password['password'])
 	{
@@ -1307,11 +1329,11 @@ elseif($mybb->input['action2'] == "password")
 	$form_container->output_row($lang->pluginuploader_password . " <em>*</em>", $lang->pluginuploader_password_desc, $form->generate_password_box("password1"));
 	$form_container->output_row($lang->pluginuploader_password_confirm . " <em>*</em>", $lang->pluginuploader_password_confirm_desc, $form->generate_password_box("password2"));
 	$form_container->end();
-	
+
 	$buttons[] = $form->generate_submit_button($lang->submit, array("id" => "submit"));
 	$form->output_submit_wrapper($buttons);
 	$form->end();
-	
+
 	$page->output_footer();
 }
 elseif($mybb->input['action2'] == "clear_password")
@@ -1321,9 +1343,9 @@ elseif($mybb->input['action2'] == "clear_password")
 		flash_message($lang->invalid_post_verify_key2, 'error');
 		admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 	}
-	
+
 	my_unsetcookie("mybb_pluginuploader_key");
-	
+
 	flash_message($lang->pluginuploader_password_cleared, 'success');
 	admin_redirect("index.php?module=config-plugins&action=pluginuploader");
 }
@@ -1331,17 +1353,17 @@ elseif($mybb->input['action2'] == 'mods_site_integration')
 {
 	$page->add_breadcrumb_item($lang->pluginuploader_mods_site_title);
 	$page->output_header($lang->pluginuploader);
-	
+
 	$table = new Table;
-	
+
 	$table->construct_cell($lang->pluginuploader_mods_site_how_it_works);
 	$table->construct_row();
-	
+
 	$table->construct_cell($lang->pluginuploader_mods_site_why_it_wont_work);
 	$table->construct_row();
-	
+
 	echo $table->output($lang->pluginuploader_mods_site_title);
-	
+
 	$page->output_footer();
 }
 else
@@ -1358,13 +1380,13 @@ else
 			$pluginuploader->clear_ftp_details('cookie');
 		}
 	}
-	
+
 	update_admin_session('pluginuploader_import_source', 'upload');
-	
+
 	$page->output_header($lang->pluginuploader);
-	
+
 	$lang->load("config_plugins");
-	
+
 	$sub_tabs['plugins'] = array(
 		'title' => $lang->plugins,
 		'link' => "index.php?module=config-plugins",
@@ -1375,17 +1397,17 @@ else
 		'link' => "index.php?module=config-plugins&amp;action=check",
 		'description' => $lang->plugin_updates_desc
 	);
-	
+
 	$sub_tabs['browse_plugins'] = array(
 		'title' => $lang->browse_plugins,
 		'link' => "index.php?module=config-plugins&amp;action=browse",
 		'description' => $lang->browse_plugins_desc
 	);
-	
+
 	$plugins->run_hooks("admin_config_plugins_tabs", $sub_tabs);
-	
+
 	$page->output_nav_tabs($sub_tabs, 'upload_plugin');
-	
+
 	if(!DISABLE_PLUGINUPLOADER_PASSWORD)
 	{
 		$query = $db->simple_select("pluginuploader", "files AS password", "name = '_password'");
@@ -1406,16 +1428,16 @@ else
 			$perms = unserialize($admin['permissions']);
 			$perms['config']['pluginuploader'] = 0;
 			$perms = serialize($perms);
-			
+
 			$update = array(
 				"permissions" => $db->escape_string($perms)
 			);
 			$db->update_query("adminoptions", $update, "uid = '" . $db->escape_string($admin['uid']) . "'");
 		}
-		
+
 		$form = new Form("index.php?module=config-plugins&amp;action=pluginuploader&amp;action2=do_password", "post");
 		$form_container = new FormContainer($lang->pluginuploader_install_password_message_title);
-		
+
 		$form_container->output_row("", "", "<span style=\"font-size: 32px; font-weight: bolder;\">" . $lang->pluginuploader_install_password_message_title . "</span><br /><br />" . $lang->pluginuploader_install_password_message);
 		if(is_super_admin($mybb->user['uid']))
 		{
@@ -1427,7 +1449,7 @@ else
 			$form_container->output_row("", "", $lang->pluginuploader_install_password_message_not_super_admin);
 		}
 		$form_container->end();
-		
+
 		$buttons[] = $form->generate_submit_button($lang->submit, array("id" => "submit"));
 		$form->output_submit_wrapper($buttons);
 		$form->end();
@@ -1444,12 +1466,12 @@ else
 		}
 		</style>";
 		echo '<script src="jscripts/pluginuploader.js?version='.PLUGINUPLOADER_VERSION.'"></script>';
-		
+
 		echo '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XKSCRPTRJ7KJE" target="_blank" style="position: absolute; margin-top: 45px; right: 25px;"><img src="https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif" alt="Donate" title="Donate" /></a>';
-		
+
 		$form = new Form("index.php?module=config-plugins&amp;action=pluginuploader&amp;action2=do_upload", "post", "", 1, "", "", "submit = document.getElementById('submit'); submit.style.color = '#CCCCCC'; submit.style.border = '1px solid #CCCCCC'; submit.disabled = 'disabled';");
 		$form_container = new FormContainer($lang->pluginuploader_upload_plugin);
-		
+
 		$plugin_url = '';
 		$has_site_login_value = 0;
 		$url_site_login_style = ' style="display: none;"';
@@ -1464,7 +1486,7 @@ else
 			$url_site_login_style = '';
 			$url_site_needs_login_style = ' style="display: none;"';
 		}
-		
+
 		$form_container->output_row(
 			$lang->pluginuploader_plugin . " <em>*</em>", '',
 			'<fieldset><legend>'.$lang->pluginuploader_plugin_file.'</legend>'.$lang->pluginuploader_plugin_file_desc.'<br />'.$form->generate_file_upload_box("plugin_file").'</fieldset>'.
@@ -1483,10 +1505,10 @@ else
 			$lang->pluginuploader_plugin_desc_warning.'<br /><br />'.
 			'<fieldset><legend>'.$lang->pluginuploader_plugin_mods_site.'</legend>'.(pluginuploader_can_use_mods_site()?$lang->pluginuploader_plugin_mods_site_desc:$lang->pluginuploader_plugin_mods_site_unavailable_desc).'</fieldset>'
 		);
-		
+
 		$form_container->end();
 		$form_container = new FormContainer();
-		
+
 		if(!DISABLE_PLUGINUPLOADER_PASSWORD)
 		{
 			$password_links = '';
@@ -1497,7 +1519,7 @@ else
 					$password_links .= $lang->pluginuploader_password_change.$lang->pluginuploader_password_change_clear_or;
 				}
 				$password_links .= $lang->sprintf($lang->pluginuploader_password_clear, $mybb->post_code).'.';
-				
+
 				$form_container->output_row($lang->pluginuploader_password, '', $lang->pluginuploader_password_stored_cookie."<br /><br >".$password_links);
 			}
 			else
@@ -1517,7 +1539,7 @@ else
 		$pluginuploader_ftp_desc_links = '';
 		$config_code = '';
 		$br = '<br /><br />';
-		
+
 		if($ftp_connect_check === true)
 		{
 			$ftp_message .= "success";
@@ -1551,7 +1573,7 @@ else
 				$pluginuploader_ftp_desc_links = $lang->sprintf($lang->pluginuploader_ftp_desc_link_set, '');
 			}
 		}
-		
+
 		if(!$copy_test)
 		{
 			$pluginuploader_ftp_title = $lang->pluginuploader_ftp_required;
@@ -1581,7 +1603,7 @@ else
 			$ftp_content = $pluginuploader_ftp_desc.'<label for="use_ftp_checkbox" style="font-weight: normal;">'.$lang->pluginuploader_use_ftp.'</label>'.$form->generate_check_box('use_ftp_checkbox', 1, '', array('id' => 'use_ftp_checkbox', 'checked' => $use_ftp_checked)).'<span'.$ftp_content_style.'><br /><br />'.$ftp_message.$ftp_details_stored_location.$pluginuploader_ftp_desc_links.'</span>';
 		}
 		$form_container->output_row($pluginuploader_ftp_title, "", $ftp_content);
-		
+
 		/*$checked = true;
 		$send_usage_stats = $mybb->cookies['mybb_pluginuploader_send_usage_stats'];
 		if($send_usage_stats == 'no')
@@ -1589,9 +1611,9 @@ else
 			$checked = false;
 		}
 		$form_container->output_row('', '', $form->generate_check_box("send_usage_stats", 1, '', array('checked' => $checked)).$lang->pluginuploader_stats."<br /><br />".$lang->pluginuploader_stats_desc.' <a href="javascript:void(0)" id="send_usage_stats_more">'.$lang->pluginuploader_stats_more.'</a><div id="send_usage_stats_more_info" style="display: none; font-style: italic;"><br />'.$lang->pluginuploader_stats_more_info.'</div>');*/
-		
+
 		$form_container->end();
-		
+
 		$buttons[] = $form->generate_submit_button($lang->submit, array("id" => "submit"));
 		$form->output_submit_wrapper($buttons);
 		$form->end();
@@ -1603,52 +1625,52 @@ else
 function pluginuploader_create_temp_dir($name)
 {
 	global $pluginuploader;
-	
+
 	if(!is_dir(MYBB_ROOT . "inc/plugins/temp/"))
 	{
 		@mkdir(MYBB_ROOT . "inc/plugins/temp/");
-		
+
 		if(!is_dir(MYBB_ROOT . "inc/plugins/temp/"))
 		{
 			return false;
 		}
-		
+
 		@my_chmod(MYBB_ROOT . "inc/plugins/temp/", 0777);
 	}
-	
+
 	$path = MYBB_ROOT . "inc/plugins/temp/" . $name;
-	
+
 	// if the folder already exists, remove it
 	if(is_dir($path))
 	{
 		@$pluginuploader->rmdir($path);
 	}
-	
+
 	// try to make the folder
 	if(!@$pluginuploader->mkdir($path))
 	{
 		return false;
 	}
-	
+
 	// if it's not been made, return false
 	if(!is_dir($path))
 	{
 		return false;
 	}
-	
+
 	// try and CHMOD the folder
 	@my_chmod($path, 0777);
-	
+
 	return true;
 }
 
 function pluginuploader_find_root($path)
 {
 	global $pluginuploader;
-	
+
 	// change the current working directory
 	chdir($path);
-	
+
 	// cycle through a list of possible folders the plugin author could have put the files in
 	$file_roots = array(
 		"files",
@@ -1664,23 +1686,23 @@ function pluginuploader_find_root($path)
 			return $path . "/" . $file_root;
 		}
 	}
-	
+
 	// if we have PHP files here, this is the root
 	if(count(@$pluginuploader->glob("*.php")) > 0)
 	{
 		return $path;
 	}
-	
+
 	// if we have an inc folder here, this is the root
 	if(is_dir($path . "/inc"))
 	{
 		return $path;
 	}
-	
+
 	// still going, so go through any folders we have
 	// this could be another folder in the zip archive before the plugin file root
 	$dirs = array_filter(@$pluginuploader->glob('*'), 'is_dir');
-	
+
 	foreach($dirs as $key => $dir)
 	{
 		// if there's a __MACOSX folder, get rid of it, we don't want to deal with that
@@ -1689,7 +1711,7 @@ function pluginuploader_find_root($path)
 			unset($dirs[$key]);
 		}
 	}
-	
+
 	// if there's more than one folder, we don't know where we're supposed to go; if this is the case, exit the function and we'll show an error to the user, plugin isn't packaged very well
 	if(count($dirs) > 1)
 	{
@@ -1699,7 +1721,7 @@ function pluginuploader_find_root($path)
 	{
 		// get the last element of the array - there's only 1 value in it, but the key could be 0 or 1, this will get the value of the new folder regardless
 		$new_dir = end($dirs);
-		
+
 		// set the new path
 		$path .= "/" . $new_dir;
 		// go again with the new path
@@ -1710,7 +1732,7 @@ function pluginuploader_find_root($path)
 function pluginuploader_find_pluginfile($root)
 {
 	global $pluginuploader;
-	
+
 	// now we have to try and find the main plugin file
 	if(is_dir($root . "/inc"))
 	{
@@ -1748,27 +1770,27 @@ function pluginuploader_find_pluginfile($root)
 					$plugin_file = $key;
 				}
 			}
-			
+
 			if(!isset($lang_file))
 			{
 				// return false if no language file was found; we have no way of knowing where this second file is supposed to go if it isn't a language file
 				return false;
 			}
-			
+
 			$plugin_file = $php[$plugin_file];
 			$lang_file = $php[$lang_file];
 			$lang_file = str_replace(".lang", "", $lang_file);
-			
+
 			if($plugin_file == $lang_file)
 			{
 				// the names of the files are the same once .lang is removed from the language file, return this as the plugin file
 				return $plugin_file;
 			}
-			
+
 			// if we're still going on, something weird has happened, return false
 			return false;
 		}
-		// 
+		//
 		else
 		{
 			return false;
@@ -1779,21 +1801,21 @@ function pluginuploader_find_pluginfile($root)
 function pluginuploader_has_external_files($root)
 {
 	global $pluginuploader;
-	
+
 	chdir($root);
-	
+
 	if(!is_dir("inc"))
 	{
 		return false;
 	}
-	
+
 	$dirs = array_filter(@$pluginuploader->glob('inc/plugins/*'), 'is_dir');
-	
+
 	if(!empty($dirs) || is_dir('inc/languages'))
 	{
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -1801,11 +1823,11 @@ function pluginuploader_has_external_files($root)
 function pluginuploader_load_external_files($path, $root)
 {
 	global $pluginuploader;
-	
+
 	static $ret = array();
-	
+
 	chdir($path);
-	
+
 	// if the current folder is ./inc/plugins/ we want to ignore any PHP files as it'll be the plugin file itself
 	if(str_replace($root, '', $path) == '/inc/plugins')
 	{
@@ -1815,10 +1837,10 @@ function pluginuploader_load_external_files($path, $root)
 	{
 		$php = @$pluginuploader->glob("*.php");
 	}
-	
+
 	$dirs = array_filter(@$pluginuploader->glob("*"), "is_dir");
 	$objects = array_merge($php, $dirs);
-	
+
 	foreach($objects as $object)
 	{
 		if(is_dir($path . "/" . $object))
@@ -1839,33 +1861,33 @@ function pluginuploader_load_external_files($path, $root)
 			);
 		}
 	}
-	
+
 	return $ret;
 }
 
 function pluginuploader_move_files($path, $type, $current_files = array(), $import_non_php_root_files = false)
 {
 	global $mybb, $pluginuploader, $root, $ret, $all_files_list;
-	
+
 	if(!is_array($ret))
 	{
 		$ret = array(
 			"files" => $current_files
 		);
 	}
-	
+
 	if(!is_array($all_files_list))
 	{
 		$all_files_list = $current_files;
 	}
-	
+
 	chdir($path);
-	
+
 	if(!$root)
 	{
 		$root = $path;
 	}
-	
+
 	if(is_dir($path))
 	{
 		if(is_dir($root . "/inc"))
@@ -1895,7 +1917,7 @@ function pluginuploader_move_files($path, $type, $current_files = array(), $impo
 							continue;
 						}
 					}
-					
+
 					if(is_dir($from))
 					{
 						if(!is_dir($to) || in_array($friendly_file_name, $current_files))
@@ -1942,7 +1964,7 @@ function pluginuploader_move_files($path, $type, $current_files = array(), $impo
 		else
 		{
 			$php = @$pluginuploader->glob("*.php");
-			
+
 			// there's just one PHP file, this is the plugin file
 			if(count($php) == 1)
 			{
@@ -1978,7 +2000,7 @@ function pluginuploader_move_files($path, $type, $current_files = array(), $impo
 					}
 				}
 			}
-			
+
 			$all = $pluginuploader->glob("*");
 			// we have other files here that aren't PHP files, try and do something with them
 			if(count($all) > count($php))
@@ -1997,7 +2019,7 @@ function pluginuploader_move_files($path, $type, $current_files = array(), $impo
 						}
 					}
 				}
-				
+
 				// do we have any images?
 				$images = @$pluginuploader->glob("{*.gif,*.GIF,*.jpg,*.JPG,*.jpeg,*.JPEG,*.png,*.PNG}", GLOB_BRACE);
 				if(count($images) > 0)
@@ -2015,23 +2037,23 @@ function pluginuploader_move_files($path, $type, $current_files = array(), $impo
 			}
 		}
 	}
-	
+
 	return $ret;
 }
 
 function pluginuploader_load_screenshots($path, $get_files = false)
 {
 	global $pluginuploader;
-	
+
 	chdir($path);
-	
+
 	// do we have any images with 'screenshot' in the name? this is to catch any in the folder we're in now
 	$screenshots = @$pluginuploader->glob($path . "/*screenshot*{.gif,.GIF,.jpg,.JPG,.jpeg,.JPEG,.png,.PNG}", GLOB_BRACE);
 	if(!empty($screenshots))
 	{
 		return $screenshots;
 	}
-	
+
 	// we're loading all images in this folder, as we're pretty sure it only contains screenshots)
 	if($get_files)
 	{
@@ -2045,7 +2067,7 @@ function pluginuploader_load_screenshots($path, $get_files = false)
 			return false;
 		}
 	}
-	
+
 	// go through any folders that could contain screenshots
 	$roots = array(
 		"screenshots",
@@ -2061,7 +2083,7 @@ function pluginuploader_load_screenshots($path, $get_files = false)
 			return pluginuploader_load_screenshots($path . "/" . $root, true);
 		}
 	}
-	
+
 	// if we're here, we've not found any screenshots, and haven't found any folders that could contain them
 	// if the folder we're in has an inc folder or PHP files in it, we've most likely gone past where the screenshots are and couldn't find them, if there even were any
 	// so to make sure we don't show any images that aren't screenshots, return false now
@@ -2069,7 +2091,7 @@ function pluginuploader_load_screenshots($path, $get_files = false)
 	{
 		return false;
 	}
-	
+
 	// still going, so go through any folders we have
 	// this could be another folder in the zip archive before the main file root
 	$dirs = array_filter(@$pluginuploader->glob('*'), 'is_dir');
@@ -2081,7 +2103,7 @@ function pluginuploader_load_screenshots($path, $get_files = false)
 			unset($dirs[$key]);
 		}
 	}
-	
+
 	if(count($dirs) > 1)
 	{
 		return false;
@@ -2098,7 +2120,7 @@ function pluginuploader_load_screenshots($path, $get_files = false)
 function pluginuploader_show_screenshots($screenshots, &$form_container, $mods_site = false)
 {
 	global $mybb, $lang;
-	
+
 	$images = "";
 	foreach($screenshots as $screenshot)
 	{
@@ -2108,22 +2130,22 @@ function pluginuploader_show_screenshots($screenshots, &$form_container, $mods_s
 		}
 		$images .= "<a href=\"{$screenshot}\" target=\"_blank\"><img src=\"{$screenshot}\" alt=\"\" height=\"200px\" style=\"border: 1px solid #CCCCCC;\" /></a>&nbsp;";
 	}
-	
+
 	$form_container->output_row($lang->pluginuploader_plugin_screenshots, $lang->pluginuploader_plugin_screenshots_desc, $images);
 }
 
 function pluginuploader_load_readme($path)
 {
 	global $pluginuploader;
-	
+
 	chdir($path);
-	
+
 	$readme_files = $pluginuploader->glob($path.'/[rR][eE][aA][dD][mM][eE]*');
 	if(!empty($readme_files))
 	{
 		return $readme_files[0];
 	}
-	
+
 	$dirs = array_filter(@$pluginuploader->glob('*'), 'is_dir');
 	foreach($dirs as $key => $dir)
 	{
@@ -2133,7 +2155,7 @@ function pluginuploader_load_readme($path)
 			unset($dirs[$key]);
 		}
 	}
-	
+
 	if(count($dirs) == 1)
 	{
 		// we have another directory to go into
@@ -2168,7 +2190,7 @@ function plugin_is_compatible($plugin, $path)
 		return false;
 	}
 	$plugin_info = $info_func();
-	
+
 	// No compatibility set or compatibility = * - assume compatible
 	if(!$plugin_info['compatibility'] || $plugin_info['compatibility'] == "*")
 	{
@@ -2193,19 +2215,19 @@ function plugin_is_compatible($plugin, $path)
 function pluginuploader_get_headers($curl, $headers)
 {
 	global $request_headers;
-	
+
 	$request_headers .= $headers;
-	
+
 	return strlen($headers);
 }
 
 function pluginuploader_send_usage_stats($plugin_codename = '', $import_source = '')
 {
 	global $mybb, $pluginuploader;
-	
+
 	$pluginuploader_info = pluginuploader_info();
 	$pluginuploader->ftp_connect();
-	
+
 	$stats = array();
 	$stats['mybb_url'] = md5($mybb->settings['bburl']);
 	$stats['mybb_version'] = $mybb->version_code;
@@ -2220,7 +2242,7 @@ function pluginuploader_send_usage_stats($plugin_codename = '', $import_source =
 	$stats['plugin_codename'] = $plugin_codename;
 	$stats['import_source'] = $import_source;
 	$stats['can_use_mods_site'] = pluginuploader_can_use_mods_site()?1:0;
-	
+
 	fetch_remote_file('http://mattrogowski.co.uk/mybb/pluginuploader.php?action=stats', $stats);
 }
 ?>
