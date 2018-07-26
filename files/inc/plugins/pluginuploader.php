@@ -64,7 +64,7 @@ function pluginuploader_install()
 				`name` VARCHAR(255) NOT NULL UNIQUE KEY,
 				`version` VARCHAR(25) NOT NULL ,
 				`files` TEXT NOT NULL
-			) ENGINE = MYISAM ;
+			) ENGINE = INNODB ROW_FORMAT=DYNAMIC;
 		");
 	}
 
